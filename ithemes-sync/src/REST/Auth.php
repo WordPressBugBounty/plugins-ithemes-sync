@@ -232,11 +232,13 @@ class Auth extends \WP_REST_Controller {
 		$transient = 'solid_central_auth_state_' . $user->user_login;
 		$set_state = set_transient( $transient, wp_hash( $state ), 300 );
 		if ( ! $set_state ) {
-			return new WP_Error( 'central.auth.start.state_error', __( 'Unable to start the authentication flow.', 'it-l10n-ithemes-sync' ) );
+			return new WP_Error( 'solid-central.auth.start.state_error', __( 'Unable to start the authentication flow.', 'it-l10n-ithemes-sync' ) );
 		}
 
 		$url  = apply_filters( 'sync_api_request_url', 'https://central.solidwp.com/plugin-api/' );
 		$url .= 'auth-start';
+
+		\Ithemes_Sync_Functions::set_time_limit( 120 );
 
 		// Make a POST request to Central Server.
 		$response = wp_safe_remote_post(
@@ -255,7 +257,7 @@ class Auth extends \WP_REST_Controller {
 						'type'         => $request['type'],
 					]
 				),
-				'timeout' => 30, // phpcs:ignore
+				'timeout' => 90, // phpcs:ignore
 			]
 		);
 
@@ -268,7 +270,7 @@ class Auth extends \WP_REST_Controller {
 		$response_body = json_decode( wp_remote_retrieve_body( $response ) );
 
 		if ( $code >= 400 && $code < 500 ) {
-			$wp_error = new WP_Error( 'central.auth.start.invalid_request', __( 'There was an error with the request.', 'it-l10n-ithemes-sync' ), [ 'status' => $code ] );
+			$wp_error = new WP_Error( 'solid-central.auth.start.invalid_request', __( 'There was an error with the request.', 'it-l10n-ithemes-sync' ), [ 'status' => $code ] );
 
 			if ( isset( $response_body->errors ) ) {
 				foreach ( (array) $response_body->errors as $key => $errors ) {
@@ -281,7 +283,7 @@ class Auth extends \WP_REST_Controller {
 			return $wp_error;
 		} elseif ( $code >= 500 && $code < 600 ) {
 			return new WP_Error(
-				'central.auth.start.server_error',
+				'solid-central.auth.start.server_error',
 				__( 'There was a temporary issue with the Solid Central server. Please try again later.', 'it-l10n-ithemes-sync' ),
 				[
 					'status' => $code,
@@ -290,7 +292,7 @@ class Auth extends \WP_REST_Controller {
 		}
 
 		if ( ! isset( $response_body->redirect ) || ! isset( $response_body->expires_at ) ) {
-			return new WP_Error( 'central.auth.start.invalid_response', __( 'Invalid response from Solid Central', 'it-l10n-ithemes-sync' ) );
+			return new WP_Error( 'solid-central.auth.start.invalid_response', __( 'Invalid response from Solid Central', 'it-l10n-ithemes-sync' ) );
 		}
 
 		return new WP_REST_Response( $response_body, 200 );

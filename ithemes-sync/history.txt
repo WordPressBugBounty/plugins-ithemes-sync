@@ -269,3 +269,5 @@
 	New: Add support for tracking vulnerabilities reported by Solid Security in Solid Central.
 3.2.0 - 2024-09-18 - Timothy Jacobs, John Hooks, John Regan
 	New: Connecting to your WordPress site from Solid Central has gotten simpler thanks to the new Application Password based authorization flow.
+3.2.1 - 2024-09-24 - Timothy Jacobs, John Hooks
+	New: Introduce streamline connection flow to Solid Central from the settings screen.

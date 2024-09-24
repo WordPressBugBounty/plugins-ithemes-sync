@@ -201,6 +201,8 @@ class Ithemes_Sync_Admin {
 		require_once $GLOBALS['ithemes_sync_path'] . '/settings.php';
 
 		require $GLOBALS['ithemes_sync_path'] . '/settings-page.php';
+
+		do_action( 'ithemes_sync_settings_page_load' );
 	}
 
 	public function settings_index() {

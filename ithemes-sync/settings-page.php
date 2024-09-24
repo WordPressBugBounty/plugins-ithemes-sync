@@ -39,6 +39,7 @@ class Ithemes_Sync_Settings_Page {
 		list( $this->self_url ) = explode( '?', $_SERVER['REQUEST_URI'] );
 		$this->self_url        .= '?page=' . $this->page_name;
 
+		add_action( 'ithemes_sync_settings_page_load', [ $this, 'handle_post_action' ] );
 		add_action( 'ithemes_sync_settings_page_index', [ $this, 'index' ] );
 		add_action( 'admin_print_styles', [ $this, 'add_styles' ] );
 		add_action( 'admin_print_scripts', [ $this, 'add_scripts' ] );
@@ -62,17 +63,15 @@ class Ithemes_Sync_Settings_Page {
 	public function index() {
 		$this->options = $GLOBALS['ithemes-sync-settings']->get_options();
 
-		$this->handle_post_action();
-
 		$this->show_settings();
 	}
 
-	private function handle_post_action() {
-		$post_data = Ithemes_Sync_Functions::get_post_data( [ 'username', 'password', 'action', 'user' ], true, true );
+	public function handle_post_action() {
+		$post_data = Ithemes_Sync_Functions::get_post_data( [ 'username', 'action', 'user' ], true, true );
 		$action    = $post_data['action'];
 
 		if ( 'authenticate' == $action ) {
-			$this->authenticate( $post_data );
+			$this->authenticate();
 		} elseif ( 'deauthenticate' == $action ) {
 			$this->deauthenticate( $post_data );
 		}
@@ -80,74 +79,40 @@ class Ithemes_Sync_Settings_Page {
 		$this->options = $GLOBALS['ithemes-sync-settings']->get_options();
 	}
 
-	private function authenticate( $data ) {
+	private function authenticate() {
 		check_admin_referer( 'authenticate-user' );
-
 
 		require_once $GLOBALS['ithemes_sync_path'] . '/server.php';
 
-
-		$result = Ithemes_Sync_Server::authenticate( $data['username'], $data['password'] );
+		$result = Ithemes_Sync_Server::authenticate();
 
 		if ( is_wp_error( $result ) ) {
 			$heading = __( 'The user could not be connected.', 'it-l10n-ithemes-sync' );
-
 			$code = $result->get_error_code();
+			$message = '';
 
 			if ( 'http_request_failed' == $code ) {
-				$message = sprintf( __( '<p>The Solid Central server was unable to be contacted. WordPress returned the following error when trying to contact the server:</p><p>%1$s</p><p>If you continue to experience problems, please contact <a target="_blank" href="%2$s">SolidWP support</a>.</p>', 'it-l10n-ithemes-sync' ), $result->get_error_message(), 'http://ithemes.com/support/' );
+				$message = '<p>' . __( 'The Solid Central server was unable to be contacted. WordPress returned the following error when trying to contact the server:', 'it-l10n-ithemes-sync' ) . '</p>';
 			} elseif ( 'ithemes-sync-server-failed-request' == $code ) {
-				$message = sprintf( __( '<p>The Solid Central server was unable to process the request at this time. Please try again in a few minutes.</p><p>If you continue to experience problems, please contact <a target="_blank" href="%s">SolidWP support</a>.</p>', 'it-l10n-ithemes-sync' ), 'http://ithemes.com/support/' );
-			} else {
-				$message = $result->get_error_message();
+				$message = '<p>' . __( 'The Solid Central server was unable to process the request at this time. Please try again in a few minutes.', 'it-l10n-ithemes-sync' ) . '</p>';
 			}
 
-			$this->add_error_message( $heading, $message );
+			foreach ( $result->get_error_messages() as $error ) {
+				$message .= '<p>' . esc_html( $error ) . '</p>';
+			}
 
-			return;
-		}
-
-		if ( empty( $result['key'] ) ) {
-			$heading = __( 'The user could not be connected.', 'it-l10n-ithemes-sync' );
-			$message = __( 'The connection request failed due to a server communication error. The server sent a response that did not include a authentication key.', 'it-l10n-ithemes-sync' );
+			/* translators: a link URL */
+			$message .= '<p>' . sprintf( __( 'If you continue to experience problems, please contact <a target="_blank" href="%s">SolidWP support</a>.', 'it-l10n-ithemes-sync' ), 'https://go.solidwp.com/central-ssc-error-support' ) . '</p>';
 
 			$this->add_error_message( $heading, $message );
 
 			return;
 		}
 
-		if ( empty( $result['user_id'] ) ) {
-			$heading = __( 'The user could not be connected.', 'it-l10n-ithemes-sync' );
-			$message = __( 'The connection request failed due to a server communication error. The server sent a response that did not include a user ID.', 'it-l10n-ithemes-sync' );
-
-			$this->add_error_message( $heading, $message );
-
-			return;
-		}
-
-
-		$add_result = $GLOBALS['ithemes-sync-settings']->add_authentication( $result['user_id'], $data['username'], $result['key'] );
-
-		if ( is_wp_error( $add_result ) ) {
-			$heading = __( 'The user could not be connected.', 'it-l10n-ithemes-sync' );
-			$message = $add_result->get_error_message();
-
-			$this->add_error_message( $heading, $message );
-
-			return;
-		}
-
-
-		$heading  = __( 'Woohoo! Your site has been connected.', 'it-l10n-ithemes-sync' );
-		$messages = [];
-
-		if ( 0 == $result['quota']['available'] ) {
-			$messages[] = sprintf( __( 'Your user has now used all of the sites available to be added to Solid Central. More information can be found on the <a href="%s" target="_blank">SolidWP membership panel</a>.', 'it-l10n-ithemes-sync' ), $this->sync_dashboard_url );
-		} else {
-			$messages[] = sprintf( _n( 'Your site is now connected. Your user can connect to %d additional site.', 'Your site is now connected. Your user can connect to %d additional sites.', $result['quota']['available'], 'it-l10n-ithemes-sync' ), $result['quota']['available'] );
-		}
-
-		$this->add_success_message( $heading, $messages );
+		// We are intentionally redirecting the user outside their WordPress site.
+		// phpcs:ignore WordPress.Security.SafeRedirect
+		wp_redirect( $result );
+		die();
 	}
 
 	private function deauthenticate( $data ) {
@@ -344,20 +309,12 @@ class Ithemes_Sync_Settings_Page {
 
 				<div class="ithemes-sync-section-inner">
 					<?php if ( empty( $this->options['authentications'] ) ) : ?>
-						<p><?php _e( 'Enter your SolidWP username & password to connect this site.', 'it-l10n-ithemes-sync' ); ?></p>
+						<p><?php _e( 'Begin the connection process to Solid Central.', 'it-l10n-ithemes-sync' ); ?></p>
 					<?php else : ?>
-						<p><?php _e( 'Add additional users if more than one person will be managing updates for this site.<br>To connect an additional user, enter their SolidWP username and password below.', 'it-l10n-ithemes-sync' ); ?></p>
+						<p><?php _e( 'Add additional users if more than one person will be managing updates for this site, connect again and log in with a different SolidWP user.', 'it-l10n-ithemes-sync' ); ?></p>
 					<?php endif; ?>
 
 					<form id="ithemes-sync-authenticate" enctype="multipart/form-data" method="post" action="<?php echo $this->self_url; ?>">
-						<label for="username"><?php _e( 'Username', 'it-l10n-ithemes-sync' ); ?></label><br>
-						<input type="text" id="username" name="username"
-							   value="<?php echo $this->had_error ? esc_attr( $post_data['username'] ) : '' ?>">
-
-						<label for="password"><?php _e( 'Password', 'it-l10n-ithemes-sync' ); ?></label><br>
-						<input type="password" id="password" name="password"
-							   value="<?php echo $this->had_error ? esc_attr( $post_data['password'] ) : '' ?>">
-
 						<input type="submit" id="submit" value="<?php _e( 'Connect', 'it-l10n-ithemes-sync' ); ?>">
 						<input type="hidden" name="action" value="authenticate">
 

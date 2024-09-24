@@ -30,7 +30,6 @@ class Ithemes_Sync_API {
 	private $verbs = [];
 
 	private $default_verbs = [
-		'check-nonce'                           => 'Ithemes_Sync_Verb_Check_Nonce',
 		'create-application-password'           => 'Ithemes_Sync_Verb_Create_Application_Password',
 		'db-optimization'                       => 'Ithemes_Sync_Verb_DB_Optimization',
 		'deauthenticate-user'                   => 'Ithemes_Sync_Verb_Deauthenticate_User',
@@ -68,7 +67,6 @@ class Ithemes_Sync_API {
 		'manage-plugins'                        => 'Ithemes_Sync_Verb_Manage_Plugins',
 		'manage-reports'                        => 'Ithemes_Sync_Verb_Manage_Reports',
 		'manage-roles'                          => 'Ithemes_Sync_Verb_Manage_Roles',
-		'manage-site'                           => 'Ithemes_Sync_Verb_Manage_Site',
 		'manage-themes'                         => 'Ithemes_Sync_Verb_Manage_Themes',
 		'manage-users'                          => 'Ithemes_Sync_Verb_Manage_Users',
 		'set-admin-bar-item-whitelist'          => 'Ithemes_Sync_Verb_Set_Admin_Bar_Item_Whitelist',

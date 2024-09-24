@@ -28,20 +28,27 @@ class Ithemes_Sync_Server {
 	private static $password_iterations = 8;
 
 
-	public static function authenticate( $username, $password ) {
-		require_once $GLOBALS['ithemes_sync_path'] . '/functions.php';
+	/**
+	 * @return string|WP_Error The redirect URL to finish site connection.
+	 */
+	public static function authenticate() {
+		$request = new WP_REST_Request( 'POST', '/solid-central/v1/auth/start' );
+		$request->set_query_params(
+			[
+				'type' => 'central-onboard',
+			] 
+		);
+		$response = rest_do_request( $request );
 
-		$query = [
-			'user' => $username,
-		];
+		if ( $response->is_error() ) {
+			return $response->as_error();
+		}
 
-		$nonce = Ithemes_Sync_Functions::generate_sync_nonce( 'auth-verification' );
-		$data  = [
-			'auth_token' => self::get_password_hash( $username, $password ),
-			'nonce'      => $nonce['value'],
-		];
+		if ( empty( $response->get_data()->redirect ) ) {
+			return new WP_Error( 'solid-central.auth.start.invalid_response', __( 'Invalid response from Solid Central.', 'it-l10n-ithemes-sync' ) );
+		}
 
-		return self::request( 'authenticate-user', $query, $data );
+		return $response->get_data()->redirect;
 	}
 
 	public static function deauthenticate( $user_id, $username, $private_key ) {

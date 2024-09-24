@@ -4,7 +4,7 @@ Tags: manage multiple websites, backup, security, manage updates, report dashboa
 Requires at least: 6.4
 Requires PHP: 7.0
 Tested up to: 6.7
-Stable tag: 3.2.0
+Stable tag: 3.2.1
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/quick-guide-gplv3.html
 
@@ -129,6 +129,9 @@ Solid Central includes an automatic “Add Site” prompt when you first login t
 Got more questions? [Contact us!](https://solidwp.com/contact.)
 
 == Changelog ==
+
+= 3.2.1 =
+* New: Introduce streamline connection flow to Solid Central from the settings screen.
 
 = 3.2.0 =
 * New: Connecting to your WordPress site from Solid Central has gotten simpler thanks to the new Application Password based authorization flow.
