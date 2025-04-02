@@ -1,10 +1,10 @@
 === Solid Central – Site Management, Backups, Security, and Reporting ===
-Contributors: ithemes, layotte, oakesjosh, solidwp
+Contributors: ithemes, solidwp, stellarwp, timothyblynjacobs, bitmachina, oakesjosh
 Tags: manage multiple websites, backup, security, manage updates, report dashboard
 Requires at least: 6.4
 Requires PHP: 7.0
 Tested up to: 6.8
-Stable tag: 3.2.2
+Stable tag: 3.2.3
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/quick-guide-gplv3.html
 
@@ -129,6 +129,10 @@ Solid Central includes an automatic “Add Site” prompt when you first login t
 Got more questions? [Contact us!](https://solidwp.com/contact.)
 
 == Changelog ==
+
+= 3.2.3 =
+* Tweak: Add additional debug output to plugin and theme installations.
+* Tweak: Add support for setting the Solid Licensed Site URL.
 
 = 3.2.2 =
 * Tweak: Improve plugin and theme installation error messages reported to Solid Central.

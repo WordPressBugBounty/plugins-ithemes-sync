@@ -271,5 +271,8 @@
 	New: Connecting to your WordPress site from Solid Central has gotten simpler thanks to the new Application Password based authorization flow.
 3.2.1 - 2024-09-24 - Timothy Jacobs, John Hooks
 	New: Introduce streamline connection flow to Solid Central from the settings screen.
-3.2.1 - 2025-03-13 - Timothy Jacobs, John Hooks
+3.2.2 - 2025-03-13 - Timothy Jacobs, John Hooks
 	Tweak: Improve plugin and theme installation error messages reported to Solid Central.
+3.2.3 - 2025-04-01 - Timothy Jacobs, John Hooks
+	Tweak: Add additional debug output to plugin and theme installations.
+	Tweak: Add support for setting the Solid Licensed Site URL.

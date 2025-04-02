@@ -171,7 +171,8 @@ class Ithemes_Sync_Verb_Manage_themes extends Ithemes_Sync_Verb {
 
 		if ( is_wp_error( $result ) ) {
 			return [
-				'error' => rest_convert_error_to_response( $result )->data,
+				'error'             => rest_convert_error_to_response( $result )->data,
+				'upgrader_feedback' => $skin->get_upgrade_messages(),
 			];
 		} else {
 			$response['result'] = $result;
@@ -194,6 +195,8 @@ class Ithemes_Sync_Verb_Manage_themes extends Ithemes_Sync_Verb {
 				$response['error'] = rest_convert_error_to_response( $skin->get_errors() )->data;
 			}
 		}
+
+		$response['upgrader_feedback'] = $skin->get_upgrade_messages();
 
 		Ithemes_Sync_Functions::refresh_theme_updates();
 

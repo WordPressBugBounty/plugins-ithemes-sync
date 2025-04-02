@@ -202,7 +202,6 @@ class Ithemes_Sync_Verb_Manage_Plugins extends Ithemes_Sync_Verb {
 		if ( is_wp_error( $result ) ) {
 			$response['error'] = rest_convert_error_to_response( $result )->data;
 		} else {
-
 			$response = [
 				'result' => $result,
 				'slug'   => $upgrader->plugin_info(),
@@ -216,6 +215,8 @@ class Ithemes_Sync_Verb_Manage_Plugins extends Ithemes_Sync_Verb {
 				$response['error'] = rest_convert_error_to_response( $skin->get_errors() )->data;
 			}
 		}
+
+		$response['upgrader_feedback'] = $skin->get_upgrade_messages();
 
 		Ithemes_Sync_Functions::refresh_plugin_updates();
 
