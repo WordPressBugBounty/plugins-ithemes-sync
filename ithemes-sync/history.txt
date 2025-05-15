@@ -276,3 +276,8 @@
 3.2.3 - 2025-04-01 - Timothy Jacobs, John Hooks
 	Tweak: Add additional debug output to plugin and theme installations.
 	Tweak: Add support for setting the Solid Licensed Site URL.
+3.2.4 - 2025-05-15 - John Hooks, Volodymyr Shelmuk
+	New: Add WP REST verb endpoint for improved refresh of site data.
+	Enhancement: Improve refresh of upgrades compatiblity with 3rd party plugins and themes.
+	Enhancement: Refactor connection and notification to use new Central server Plugin API.
+	Enhancement: Add StellarSite detection and update settings page.

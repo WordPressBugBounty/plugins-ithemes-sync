@@ -19,22 +19,23 @@ Version History
 		Updated Sync dashboard URL.
 */
 
+use SolidWP\Central\Central_Server\Central_Server_Client;
 
 class Ithemes_Sync_Settings_Page {
-	private $page_name = 'solid-central';
-
+	private $page_name          = 'solid-central';
 	private $path_url           = '';
 	private $self_url           = '';
 	private $had_error          = false;
 	private $messages           = [];
 	private $sync_dashboard_url = 'https://central.solidwp.com/';
+	private $is_stellarsite     = false;
 	private $options;
-
 
 	public function __construct() {
 		require_once $GLOBALS['ithemes_sync_path'] . '/functions.php';
 
-		$this->path_url = Ithemes_Sync_Functions::get_url( $GLOBALS['ithemes_sync_path'] );
+		$this->is_stellarsite = Ithemes_Sync_Functions::is_stellarsite();
+		$this->path_url       = Ithemes_Sync_Functions::get_url( $GLOBALS['ithemes_sync_path'] );
 
 		list( $this->self_url ) = explode( '?', $_SERVER['REQUEST_URI'] );
 		$this->self_url        .= '?page=' . $this->page_name;
@@ -82,13 +83,11 @@ class Ithemes_Sync_Settings_Page {
 	private function authenticate() {
 		check_admin_referer( 'authenticate-user' );
 
-		require_once $GLOBALS['ithemes_sync_path'] . '/server.php';
-
-		$result = Ithemes_Sync_Server::authenticate();
+		$result = Central_Server_Client::authenticate();
 
 		if ( is_wp_error( $result ) ) {
 			$heading = __( 'The user could not be connected.', 'it-l10n-ithemes-sync' );
-			$code = $result->get_error_code();
+			$code    = $result->get_error_code();
 			$message = '';
 
 			if ( 'http_request_failed' == $code ) {
@@ -116,16 +115,23 @@ class Ithemes_Sync_Settings_Page {
 	}
 
 	private function deauthenticate( $data ) {
-		require_once $GLOBALS['ithemes_sync_path'] . '/server.php';
-
-
-		$options      = $GLOBALS['ithemes-sync-settings']->get_options();
 		$user_details = $GLOBALS['ithemes-sync-settings']->get_authentication_details( $data['user'] );
 
+		$result = Central_Server_Client::disconnect(
+			[
+				'site_id'     => $data['user'],
+				'username'    => $user_details['username'],
+				'private_key' => $user_details['key'],
+			]
+		);
 
-		$result = Ithemes_Sync_Server::deauthenticate( $data['user'], $user_details['username'], $user_details['key'] );
+		$is_error = is_wp_error( $result );
 
-		if ( is_wp_error( $result ) && ( 'authentication' != $result->get_error_code() ) && 'This site has not been authenticated by this user.' != $result->get_error_message() ) {
+		$is_allowed_error = $is_error
+							&& $result->get_error_code() === 'solid-central.server-failed-request'
+							&& in_array( $result->get_error_data( 'solid-central.server-failed-request' )['status'], [ 401, 404 ], true );
+
+		if ( $is_error && ! $is_allowed_error ) {
 			$heading = $result->get_error_message();
 			$message = __( 'The user could not be disconnected.', 'it-l10n-ithemes-sync' );
 
@@ -133,7 +139,6 @@ class Ithemes_Sync_Settings_Page {
 
 			return;
 		}
-
 
 		$result = $GLOBALS['ithemes-sync-settings']->remove_authentication( $data['user'], $user_details['username'] );
 
@@ -145,7 +150,6 @@ class Ithemes_Sync_Settings_Page {
 
 			return;
 		}
-
 
 		$heading = '';
 		$message = __( 'The user was successfully disconnected.', 'it-l10n-ithemes-sync' );
@@ -166,7 +170,6 @@ class Ithemes_Sync_Settings_Page {
 	}
 
 	private function show_message( $heading, $messages, $class ) {
-
 		?>
 		<div class="message <?php echo $class; ?>">
 			<?php foreach ( (array) $messages as $message ) : ?>
@@ -192,11 +195,8 @@ class Ithemes_Sync_Settings_Page {
 	private function save_settings() {
 		check_admin_referer( 'save_settings', 'ithemes_sync_nonce' );
 
-
 		$settings_defaults = [];
-
-
-		$settings = [];
+		$settings          = [];
 
 		foreach ( $settings_defaults as $var => $val ) {
 			if ( isset( $_POST[ $var ] ) ) {
@@ -206,15 +206,12 @@ class Ithemes_Sync_Settings_Page {
 			}
 		}
 
-
 		$GLOBALS['ithemes-sync-settings']->update_options( $settings );
 
 		$this->messages[] = __( 'Settings saved', 'it-l10n-ithemes-sync' );
 	}
 
 	public function show_settings() {
-		$post_data = Ithemes_Sync_Functions::get_post_data( [ 'username', 'password' ], true );
-
 		if ( ! is_multisite() ) {
 			$validations = $GLOBALS['ithemes-sync-settings']->validate_authentications();
 		}
@@ -231,7 +228,6 @@ class Ithemes_Sync_Settings_Page {
 				$invalid_users[] = $user_id;
 			}
 		}
-
 
 		?>
 		<div class="ithemes-sync-wrapper wrap">
@@ -250,41 +246,59 @@ class Ithemes_Sync_Settings_Page {
 					<h3><?php _e( 'Manage Connected Users', 'it-l10n-ithemes-sync' ); ?></h3>
 
 					<div class="ithemes-sync-section-inner">
-						<p><?php _e( 'Central allows you to connect your site with multiple users.<br>View the list of connected users below, disconnect users if needed, or add additional users below.', 'it-l10n-ithemes-sync' ); ?></p>
+						<p>
+						<?php
+						if ( $this->is_stellarsite ) {
+							_e( 'View the list of connected users below.<br/> You can manage the connection to your StellarSite in Solid Central.', 'it-l10n-ithemes-sync' );
+						} else {
+							_e( 'Central allows you to connect your site with multiple users.<br/>View the list of connected users below, disconnect users if needed, or add additional users below.', 'it-l10n-ithemes-sync' );
+						}
+						?>
+						</p>
 
 						<?php if ( ! empty( $valid_users ) ) : ?>
-							<div class="ithemes-sync-users ithemes-sync-valid-users">
-								<h4><?php _e( 'Connected Users', 'it-l10n-ithemes-sync' ); ?></h4>
+						<div class="ithemes-sync-users ithemes-sync-valid-users">
+							<h4><?php _e( 'Connected Users', 'it-l10n-ithemes-sync' ); ?></h4>
 
-								<ul>
-									<?php foreach ( $valid_users as $user_id ) : ?>
-										<li>
-											<div class="user"><?php echo esc_attr( $this->options['authentications'][ $user_id ]['username'] ); ?></div>
-											<?php
-											$query_args = [
-												'action' => 'deauthenticate',
-												'user'   => $user_id,
-											];
-											?>
-											<div class="deauthenticate"><a href="<?php echo add_query_arg( $query_args, $this->self_url ); ?>">Disconnect</a>
-										</li>
-									<?php endforeach; ?>
-								</ul>
-							</div>
+							<ul>
+								<?php foreach ( $valid_users as $user_id ) : ?>
+								<li>
+									<div class="user"><?php echo esc_attr( $this->options['authentications'][ $user_id ]['username'] ); ?></div>
+									<?php
+									$query_args = [
+										'action' => 'deauthenticate',
+										'user'   => $user_id,
+									];
+									?>
+									<?php if ( ! $this->is_stellarsite ) : ?>
+									<div class="deauthenticate">
+										<a href="<?php echo add_query_arg( $query_args, $this->self_url ); ?>">
+											<?php _e( 'Disconnect', 'it-l10n-ithemes-sync' ); ?>
+										</a>
+									</div>
+									<?php endif; ?>
+								 </li>
+								<?php endforeach; ?>
+							</ul>
+						</div>
 						<?php endif; ?>
 
 						<?php if ( ! empty( $invalid_users ) ) : ?>
 							<div class="ithemes-sync-users ithemes-sync-invalid-users">
 								<h4><?php _e( 'Invalid Users', 'it-l10n-ithemes-sync' ); ?></h4>
 
-								<p><?php _e( 'The following users were not recognized by the server. Disconnect them and reconnect them again to fix this error.', 'it-l10n-ithemes-sync' ); ?></p>
+								<p>
+									<?php
+									if ( $this->is_stellarsite ) {
+										_e( 'The following users were not recognized by the server. Reconnection should be preformed from the Central dashboard .', 'it-l10n-ithemes-sync' );
+									} else {
+										_e( 'The following users were not recognized by the server. Disconnect them and reconnect them again to fix this error.', 'it-l10n-ithemes-sync' );
+									}
+									?>
+								</p>
 
 								<ul>
-									<?php
-									foreach ( $invalid_users
-
-									as $user_id ) :
-										?>
+									<?php foreach ( $invalid_users as $user_id ) : ?>
 									<li>
 										<div class="user"><?php echo esc_attr( $this->options['authentications'][ $user_id ]['username'] ); ?></div>
 										<?php
@@ -293,9 +307,15 @@ class Ithemes_Sync_Settings_Page {
 											'user'   => $user_id,
 										];
 										?>
-										<div class="deauthenticate"><a href="<?php echo add_query_arg( $query_args, $this->self_url ); ?>">Disconnect</a>
+										<?php if ( ! $this->is_stellarsite ) :?>
+											<div class="deauthenticate">
+												<a href="<?php echo add_query_arg( $query_args, $this->self_url ); ?>">
+													<?php _e( 'Disconnect', 'it-l10n-ithemes-sync' ); ?>
+												</a>
+											</div>
+										<?php endif; ?>
 									</li>
-								<?php endforeach; ?>
+									<?php endforeach; ?>
 								</ul>
 							</div>
 						<?php endif; ?>
@@ -303,25 +323,27 @@ class Ithemes_Sync_Settings_Page {
 				</div>
 			<?php endif; ?>
 
+			<?php if ( ! $this->is_stellarsite ) : ?>
+				<div class="ithemes-sync-section ithemes-sync-authorize">
+					<h3><?php _e( 'Add Users', 'it-l10n-ithemes-sync' ); ?></h3>
 
-			<div class="ithemes-sync-section ithemes-sync-authorize">
-				<h3><?php _e( 'Add Users', 'it-l10n-ithemes-sync' ); ?></h3>
+					<div class="ithemes-sync-section-inner">
+						<?php if ( empty( $this->options['authentications'] ) ) : ?>
+							<p><?php _e( 'Begin the connection process to Solid Central.', 'it-l10n-ithemes-sync' ); ?></p>
+						<?php else : ?>
+							<p><?php _e( 'Add additional users if more than one person will be managing updates for this site, connect again and log in with a different SolidWP user.', 'it-l10n-ithemes-sync' ); ?></p>
+						<?php endif; ?>
 
-				<div class="ithemes-sync-section-inner">
-					<?php if ( empty( $this->options['authentications'] ) ) : ?>
-						<p><?php _e( 'Begin the connection process to Solid Central.', 'it-l10n-ithemes-sync' ); ?></p>
-					<?php else : ?>
-						<p><?php _e( 'Add additional users if more than one person will be managing updates for this site, connect again and log in with a different SolidWP user.', 'it-l10n-ithemes-sync' ); ?></p>
-					<?php endif; ?>
+						<form id="ithemes-sync-authenticate" enctype="multipart/form-data" method="post" action="<?php echo $this->self_url; ?>">
+							<input type="submit" id="submit" value="<?php _e( 'Connect', 'it-l10n-ithemes-sync' ); ?>">
+							<input type="hidden" name="action" value="authenticate">
 
-					<form id="ithemes-sync-authenticate" enctype="multipart/form-data" method="post" action="<?php echo $this->self_url; ?>">
-						<input type="submit" id="submit" value="<?php _e( 'Connect', 'it-l10n-ithemes-sync' ); ?>">
-						<input type="hidden" name="action" value="authenticate">
-
-						<?php wp_nonce_field( 'authenticate-user' ); ?>
-					</form>
+							<?php wp_nonce_field( 'authenticate-user' ); ?>
+						</form>
+					</div>
 				</div>
-			</div>
+			<?php endif; ?>
+
 			<?php do_action( 'sync_dev_render' ); ?>
 		</div>
 		<?php

@@ -4,13 +4,15 @@
  * Plugin URI: https://solidwp.com/central
  * Description: Maximize and amplify your admin with remote, multi-site management. One centralized dashboard to save time.
  * Author: SolidWP
- * Version: 3.2.3
+ * Version: 3.2.4
  * Requires at least: 6.4
  * Requires PHP: 7.0
  * Author URI: https://solidwp.com/
  * Domain Path: /lang/
  * iThemes Package: ithemes-sync
  */
+
+use SolidWP\Central\Central_Server\Central_Server_Notifier;
 
 if ( ! empty( $GLOBALS['ithemes_sync_path'] ) ) {
 	/** @var string $active_plugin_path */
@@ -71,6 +73,7 @@ register_activation_hook( __FILE__, 'ithemes_sync_activation' );
  */
 function ithemes_sync_deactivation() {
 	wp_clear_scheduled_hook( 'ithemes_sync_daily_schedule' );
+	wp_clear_scheduled_hook( Central_Server_Notifier::SEND_QUEUED_NOTICES_ACTION );
 }
 
 register_deactivation_hook( __FILE__, 'ithemes_sync_deactivation' );

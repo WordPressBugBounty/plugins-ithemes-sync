@@ -116,8 +116,6 @@ class Ithemes_Sync_Verb_Do_Update extends Ithemes_Sync_Verb {
 		$upgrader = new Core_Upgrader( $this->skin );
 		$result   = $upgrader->upgrade( $updates['core'][ $params['upgrade_id'] ] );
 
-		Ithemes_Sync_Functions::refresh_core_updates();
-
 		if ( is_wp_error( $result ) ) {
 			return [
 				'errors' => [
@@ -221,11 +219,9 @@ class Ithemes_Sync_Verb_Do_Update extends Ithemes_Sync_Verb {
 		if ( 'plugin' === $type ) {
 			$upgrader = new Plugin_Upgrader( $this->skin );
 			$result   = $upgrader->bulk_upgrade( $packages );
-			Ithemes_Sync_Functions::refresh_plugin_updates();
 		} else {
 			$upgrader = new Theme_Upgrader( $this->skin );
 			$result   = $upgrader->bulk_upgrade( $packages );
-			Ithemes_Sync_Functions::refresh_theme_updates();
 		}
 
 		if ( is_wp_error( $result ) ) {

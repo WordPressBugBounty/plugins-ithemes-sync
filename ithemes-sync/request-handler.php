@@ -46,7 +46,33 @@ class Ithemes_Sync_Request_Handler {
 	public $original_error_reporting = 32767;
 	private $request;
 
-	public function __construct() {
+	private function __construct() {}
+
+	public static function for_rest_request() {
+		$self = new self();
+		$self->init_rest_handler();
+		return $self;
+	}
+
+	public static function for_legacy_request() {
+		$self = new self();
+		$self->init_legacy_handler();
+		return $self;
+	}
+
+	private function init_rest_handler() {
+		add_action( 'ithemes-sync-add-log', [ $this, 'add_log' ], 10, 2 );
+
+		$GLOBALS['ithemes_sync_request_handler'] = $this;
+
+		$this->options = $GLOBALS['ithemes-sync-settings']->get_options();
+
+		Ithemes_Sync_Functions::set_time_limit( 60 );
+
+		$this->disable_ext_object_cache();
+	}
+
+	private function init_legacy_handler() {
 		$this->show_errors();
 
 		if ( empty( $_POST['request'] ) ) {
@@ -315,6 +341,47 @@ class Ithemes_Sync_Request_Handler {
 		$this->send_response( $results );
 	}
 
+	/**
+	 * Handle a WP REST verb request.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return array|WP_Error The response data or an error object.
+	 */
+	public function handle_rest_request( WP_REST_Request $request ) {
+		$this->add_third_party_compatibility();
+		$this->disable_updater_transient_pre_filters();
+		$this->add_old_plugin_updater_support();
+
+		$this->request = [
+			'action'    => $request['action'],
+			'arguments' => $request['arguments'],
+		];
+
+		do_action( 'solid_central_verb_request', $this->request );
+
+		$start_time      = microtime( true );
+		$results         = $GLOBALS['ithemes-sync-api']->run( $this->request['action'], $this->request['arguments'] );
+		$this->verb_time = microtime( true ) - $start_time;
+		$response        = [];
+
+		if ( is_wp_error( $results ) ) {
+			$response['error'] = rest_convert_error_to_response( $results )->data;
+		} else {
+			$response['response'] = $results;
+		}
+
+		if ( ! empty( $this->logs ) ) {
+			$response['logs'] = $this->logs;
+		}
+
+		$response['verb_time'] = $this->verb_time;
+
+		do_action( 'solid_central_verb_response', $response );
+
+		return $response;
+	}
+
 	public function send_response( $data ) {
 		if ( is_wp_error( $data ) ) {
 			foreach ( $data->get_error_codes() as $code ) {
@@ -538,4 +605,4 @@ class Ithemes_Sync_Request_Handler {
 	}
 }
 
-new Ithemes_Sync_Request_Handler();
+Ithemes_Sync_Request_Handler::for_legacy_request();

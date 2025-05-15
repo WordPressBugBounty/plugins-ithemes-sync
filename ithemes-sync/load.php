@@ -3,8 +3,12 @@
 /*
  * Load the Sync plugin components.
  */
-if ( ! defined( 'SOLID_CENTRAL_APP_ID') ) {
-    define( 'SOLID_CENTRAL_APP_ID', 'aff8ad0a-3359-5385-9bbd-c11b5655814a' );
+
+use SolidWP\Central\Admin_Post\Admin_Post_Handler;
+use SolidWP\Central\Central_Server\Central_Server_Notifier;
+
+if ( ! defined( 'SOLID_CENTRAL_APP_ID' ) ) {
+	define( 'SOLID_CENTRAL_APP_ID', 'aff8ad0a-3359-5385-9bbd-c11b5655814a' );
 }
 
 /**
@@ -24,63 +28,70 @@ if ( is_admin() ) {
 
 require_once $GLOBALS['ithemes_sync_path'] . '/functions.php';
 require_once $GLOBALS['ithemes_sync_path'] . '/client-dashboard.php';
-require_once $GLOBALS['ithemes_sync_path'] . '/social.php';
 require_once $GLOBALS['ithemes_sync_path'] . '/notices.php';
 require_once $GLOBALS['ithemes_sync_path'] . '/duplicator.php';
+require_once $GLOBALS['ithemes_sync_path'] . '/src/Admin_Post/Admin_Post_Handler.php';
+require_once $GLOBALS['ithemes_sync_path'] . '/src/Central_Server/Central_Server_Client.php';
+require_once $GLOBALS['ithemes_sync_path'] . '/src/Central_Server/Central_Server_Notifier.php';
 require_once $GLOBALS['ithemes_sync_path'] . '/src/REST/Auth.php';
+require_once $GLOBALS['ithemes_sync_path'] . '/src/REST/Verb.php';
 
 // Load the REST API routes.
 add_action(
 	'rest_api_init',
 	function () {
 		require_once $GLOBALS['ithemes_sync_path'] . '/settings.php';
+		require_once $GLOBALS['ithemes_sync_path'] . '/api.php';
+		require_once $GLOBALS['ithemes_sync_path'] . '/request-handler.php';
+
 		( new SolidWP\Central\REST\Auth( $GLOBALS['ithemes-sync-settings'] ) )->register_routes();
+		( new SolidWP\Central\Rest\Verb( $GLOBALS['ithemes-sync-api'] ) )->register_routes();
+	}
+);
+
+require_once $GLOBALS['ithemes_sync_path'] . '/settings.php';
+$GLOBALS['solid_central_notifier'] = new Central_Server_Notifier( $GLOBALS['ithemes-sync-settings'] );
+$GLOBALS['solid_central_notifier']->init();
+
+add_action(
+	'init',
+	static function () {
+		if ( ! wp_next_scheduled( Central_Server_Notifier::SEND_QUEUED_NOTICES_ACTION ) ) {
+			wp_schedule_event( time(), 'hourly', Central_Server_Notifier::SEND_QUEUED_NOTICES_ACTION );
+		}
+
+		(new Admin_Post_Handler( $GLOBALS['ithemes-sync-settings'] ))->init();
 	}
 );
 
 /**
- * Add a notice to be sent to the server when it makes a status or notice request.
+ * Notify the Central server immediately.
  *
- * This function only sends notices to the server during the ithemes_sync_add_notices action. If a notice must be sent
- * to the server outside of this time, use the ithemes_sync_urgent_notice() function.
+ * @param string               $type Notice type. Must be one of the `Central_Server_Notifier::NOTICE_*` constants.
+ * @param array<string, mixed> $payload Notice payload.
  *
- * @since 1.4.0
+ * @phpstan-param Central_Server_Notifier::NOTICE_* $type
  *
- * @param string $source Uniquely identifies the project that is sending the notice.
- * @param string $id Identifies the type of notice. This is to allow the server to differentiate different kinds of
- *   notices without having to parse the message.
- * @param string $subject A brief subject description of the notice that is fit for presentation to Sync users.
- * @param string $message A message that is fit for presentation to Sync users.
- * @param array  $data Optional. Data that is relevant to the notice. For notices that may be best presented in a
- *    graphical manner, this field could be used to send data used to construct the graphic.
- * @return bool Currently, it always returns true.
+ * @return true|WP_Error
  */
-function ithemes_sync_add_notice( $source, $id, $subject, $message, $data = [] ) {
-	require_once $GLOBALS['ithemes_sync_path'] . '/notice-handler.php';
-
-	return $GLOBALS['ithemes_sync_notice_handler']->add_notice( $source, $id, $subject, $message, $data );
+function solid_central_notify_server( string $type, array $payload ) {
+	return $GLOBALS['solid_central_notifier']->notify( $type, $payload );
 }
 
 /**
- * Send an urgent notice to the Sync server.
+ * Add notice to the queue. Notices will be sent by the cron schedule.
  *
- * This function sends notices to the server immediately.
+ * @see Central_Server_Notifier::send_queued_notices()
  *
- * @since 1.4.0
+ * @param string               $type Notice type. Must be one of the `Central_Server_Notifier::NOTICE_*` constants.
+ * @param array<string, mixed> $payload Notice payload.
  *
- * @param string $source Uniquely identifies the project that is sending the notice.
- * @param string $id Identifies the type of notice. This is to allow the server to differentiate different kinds of
- *   notices without having to parse the message.
- * @param string $subject A brief subject description of the notice that is fit for presentation to Sync users.
- * @param string $message A message that is fit for presentation to Sync users.
- * @param array  $data Optional. Data that is relevant to the notice. For notices that may be best presented in a
- *    graphical manner, this field could be used to send data used to construct the graphic.
- * @return bool Currently, it always returns true.
+ * @phpstan-param Central_Server_Notifier::NOTICE_* $type
+ *
+ * @return void
  */
-function ithemes_sync_send_urgent_notice( $source, $id, $subject, $message, $data = [] ) {
-	require_once $GLOBALS['ithemes_sync_path'] . '/notice-handler.php';
-
-	return $GLOBALS['ithemes_sync_notice_handler']->send_urgent_notice( $source, $id, $subject, $message, $data );
+function solid_central_add_notice( string $type, array $payload ) {
+	$GLOBALS['solid_central_notifier']->add_notice( $type, $payload );
 }
 
 /**

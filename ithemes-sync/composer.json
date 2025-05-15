@@ -42,5 +42,8 @@
 		"lint:wp:fix": [
 			"@php vendor/bin/phpcbf"
 		]
+	},
+	"require": {
+		"ext-json": "*"
 	}
 }

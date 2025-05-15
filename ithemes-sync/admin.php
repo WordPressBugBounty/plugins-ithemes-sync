@@ -320,10 +320,6 @@ class Ithemes_Sync_Admin {
 			return $response;
 		}
 
-		if ( isset( $result['success'] ) ) {
-			unset( $result['success'] );
-		}
-
 		// Store in transient for one day.
 		set_transient( 'solid_central_ping_' . $site_id, $result, DAY_IN_SECONDS );
 

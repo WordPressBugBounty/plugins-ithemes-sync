@@ -45,7 +45,6 @@ class Ithemes_Sync_API {
 		'get-plugin-details'                    => 'Ithemes_Sync_Verb_Get_Plugin_Details',
 		'get-posts'                             => 'Ithemes_Sync_Verb_Get_Posts',
 		'get-post-types'                        => 'Ithemes_Sync_Verb_Get_Post_Types',
-		'get-notices'                           => 'Ithemes_Sync_Verb_Get_Notices',
 		'get-role-details'                      => 'Ithemes_Sync_Verb_Get_Role_Details',
 		'get-server-details'                    => 'Ithemes_Sync_Verb_Get_Server_Details',
 		'get-server-lite-details'               => 'Ithemes_Sync_Verb_Get_Server_Lite_Details',
@@ -213,6 +212,12 @@ class Ithemes_Sync_API {
 		return $default_status_elements;
 	}
 
+	/**
+	 * @param string $name
+	 * @param array $arguments
+	 *
+	 * @return WP_Error|array
+	 */
 	public function run( $name, $arguments = [] ) {
 		$object = $this->get_object( $name );
 

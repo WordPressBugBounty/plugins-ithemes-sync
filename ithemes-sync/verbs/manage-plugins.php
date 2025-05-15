@@ -218,8 +218,6 @@ class Ithemes_Sync_Verb_Manage_Plugins extends Ithemes_Sync_Verb {
 
 		$response['upgrader_feedback'] = $skin->get_upgrade_messages();
 
-		Ithemes_Sync_Functions::refresh_plugin_updates();
-
 		return $response;
 	}
 

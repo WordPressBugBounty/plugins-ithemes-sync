@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5fd9fcd3511143b9f421d90507fa5a04",
+    "content-hash": "81661fe42398df36c165b548aedaf86b",
     "packages": [],
     "packages-dev": [
         {
@@ -2241,16 +2241,16 @@
         },
         {
             "name": "lucatume/wp-browser",
-            "version": "3.7.0",
+            "version": "3.7.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lucatume/wp-browser.git",
-                "reference": "ce9256a0eb5a94e2f737b70e03ae40b181a632c7"
+                "reference": "4f4e266bea123abd6a9517fb239ee4ec7735b2c7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lucatume/wp-browser/zipball/ce9256a0eb5a94e2f737b70e03ae40b181a632c7",
-                "reference": "ce9256a0eb5a94e2f737b70e03ae40b181a632c7",
+                "url": "https://api.github.com/repos/lucatume/wp-browser/zipball/4f4e266bea123abd6a9517fb239ee4ec7735b2c7",
+                "reference": "4f4e266bea123abd6a9517fb239ee4ec7735b2c7",
                 "shasum": ""
             },
             "require": {
@@ -2326,7 +2326,7 @@
             ],
             "support": {
                 "issues": "https://github.com/lucatume/wp-browser/issues",
-                "source": "https://github.com/lucatume/wp-browser/tree/3.7.0"
+                "source": "https://github.com/lucatume/wp-browser/tree/3.7.12"
             },
             "funding": [
                 {
@@ -2334,7 +2334,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-09-01T09:48:43+00:00"
+            "time": "2025-02-22T12:33:32+00:00"
         },
         {
             "name": "mck89/peast",
@@ -9683,10 +9683,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
-    "platform-dev": [],
+    "platform": {
+        "ext-json": "*"
+    },
+    "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }

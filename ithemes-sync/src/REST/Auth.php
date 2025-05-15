@@ -7,6 +7,7 @@
 
 namespace SolidWP\Central\REST;
 
+use SolidWP\Central\Central_Server\Central_Server_Client;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -128,7 +129,6 @@ class Auth extends \WP_REST_Controller {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function get_connections() {
-		require_once $GLOBALS['ithemes_sync_path'] . '/server.php';
 		$authentications = $this->settings->get_option( 'authentications' );
 
 		if ( ! $authentications ) {
@@ -138,9 +138,15 @@ class Auth extends \WP_REST_Controller {
 		$collection = [];
 
 		foreach ( $authentications as $site_id => $authentication ) {
-			$ping = \Ithemes_Sync_Server::ping( $site_id, $authentication['username'], $authentication['key'] );
+			$ping = Central_Server_Client::ping(
+				[
+					'site_id'     => $site_id,
+					'username'    => $authentication['username'],
+					'private_key' => $authentication['key'],
+				]
+			);
 
-			if ( is_wp_error( $ping ) || empty( $ping['success'] ) ) {
+			if ( is_wp_error( $ping ) ) {
 				continue;
 			}
 
@@ -341,12 +347,13 @@ class Auth extends \WP_REST_Controller {
 		$parameters = $request->get_json_params();
 
 		require_once $GLOBALS['ithemes_sync_path'] . '/settings.php';
-		require_once $GLOBALS['ithemes_sync_path'] . '/server.php';
 
-		$validate = \Ithemes_Sync_Server::validate(
-			$parameters['site_id'],
-			$parameters['solidwp_username'],
-			$parameters['site_key']
+		$validate = Central_Server_Client::validate(
+			[
+				'site_id'     => $parameters['site_id'],
+				'username'    => $parameters['solidwp_username'],
+				'private_key' => $parameters['site_key'],
+			]
 		);
 
 		if ( is_wp_error( $validate ) ) {

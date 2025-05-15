@@ -15,6 +15,8 @@ Version History
 		Added validate_authentications(), validate_authentication(), and do_ping_check().
  */
 
+use SolidWP\Central\Central_Server\Central_Server_Client;
+
 /**
  * Class Ithemes_Sync_Settings.
  */
@@ -51,7 +53,6 @@ class Ithemes_Sync_Settings {
 	 */
 	private $default_options = [
 		'authentications' => [],
-		'use_ca_patch'    => false,
 		'show_sync'       => true,
 	];
 
@@ -288,21 +289,21 @@ class Ithemes_Sync_Settings {
 	 * @return bool
 	 */
 	public function validate_authentication( $user_id ): bool {
-		require_once $GLOBALS['ithemes_sync_path'] . '/server.php';
-
 		$authentication = $this->get_authentication_details( $user_id );
 
 		if ( empty( $authentication ) ) {
 			return false;
 		}
 
-		$result = Ithemes_Sync_Server::validate( $user_id, $authentication['username'], $authentication['key'] );
+		$result = Central_Server_Client::validate(
+			[
+				'site_id'     => $user_id,
+				'username'    => $authentication['username'],
+				'private_key' => $authentication['key'],
+			]
+		);
 
-		if ( is_wp_error( $result ) || ! is_array( $result ) || ! isset( $result['success'] ) || ! $result['success'] ) {
-			return false;
-		}
-
-		return true;
+		return is_array( $result );
 	}
 
 	/**
@@ -315,8 +316,6 @@ class Ithemes_Sync_Settings {
 	 * @return array|WP_Error
 	 */
 	public function do_ping_check( $user_id = false ) {
-		require_once $GLOBALS['ithemes_sync_path'] . '/server.php';
-
 		if ( empty( $user_id ) ) {
 			$user_id = current( array_keys( $this->options['authentications'] ) );
 		}
@@ -333,23 +332,13 @@ class Ithemes_Sync_Settings {
 			);
 		}
 
-		$result = Ithemes_Sync_Server::ping( $user_id, $authentication['username'], $authentication['key'] );
-
-		if ( is_wp_error( $result ) ) {
-			return $result;
-		}
-
-		if ( ! is_array( $result ) || ! isset( $result['success'] ) || ! $result['success'] ) {
-			return new WP_Error(
-				'ithemes-sync-invalid-ping',
-				__(
-					'An error occurred when attempting to ping the Central server. Please try again later.',
-					'it-l10n-ithemes-sync'
-				)
-			);
-		}
-
-		return $result;
+		return Central_Server_Client::ping(
+			[
+				'site_id'     => $user_id,
+				'username'    => $authentication['username'],
+				'private_key' => $authentication['key'],
+			]
+		);
 	}
 }
 

@@ -31,6 +31,8 @@ Version History
 */
 
 
+use SolidWP\Central\Central_Server\Central_Server_Notifier;
+
 class Ithemes_Sync_Functions {
 	public static function get_url( $path ) {
 		$path           = str_replace( '\\', '/', $path );
@@ -313,16 +315,10 @@ class Ithemes_Sync_Functions {
 	}
 
 	public static function get_update_details( $args = [] ) {
-		if ( ! empty( $args['ithemes-updater-force-refresh'] ) && isset( $GLOBALS['ithemes-updater-settings'] ) ) {
-			$GLOBALS['ithemes-updater-settings']->flush( 'forced sync flush' );
-		}
-
 		$default_args = [
 			'verbose'       => false,
-			'force_refresh' => false,
 		];
 		$args         = array_merge( $default_args, $args );
-
 
 		$updates = [
 			'plugins'      => [],
@@ -330,24 +326,6 @@ class Ithemes_Sync_Functions {
 			'translations' => [],
 			'core'         => [],
 		];
-
-
-		if ( is_array( $args['force_refresh'] ) ) {
-			if ( in_array( 'plugins', $args['force_refresh'] ) ) {
-				$updates['force-refresh-results']['plugins'] = self::refresh_plugin_updates();
-			}
-			if ( in_array( 'themes', $args['force_refresh'] ) ) {
-				$updates['force-refresh-results']['themes'] = self::refresh_theme_updates();
-			}
-			if ( in_array( 'core', $args['force_refresh'] ) ) {
-				$updates['force-refresh-results']['core'] = self::refresh_core_updates();
-			}
-		} elseif ( $args['force_refresh'] ) {
-			$updates['force-refresh-results']['plugins'] = self::refresh_plugin_updates();
-			$updates['force-refresh-results']['themes']  = self::refresh_theme_updates();
-			$updates['force-refresh-results']['core']    = self::refresh_core_updates();
-		}
-
 
 		$update_plugins = get_site_transient( 'update_plugins' );
 
@@ -367,7 +345,6 @@ class Ithemes_Sync_Functions {
 		if ( ! empty( $update_plugins->translations ) ) {
 			$updates['translations'] = array_merge( $updates['translations'], $update_plugins->translations );
 		}
-
 
 		$update_themes = get_site_transient( 'update_themes' );
 
@@ -413,7 +390,6 @@ class Ithemes_Sync_Functions {
 		if ( ! empty( $update_core->translations ) ) {
 			$updates['translations'] = array_merge( $updates['translations'], $update_core->translations );
 		}
-
 
 		return $updates;
 	}
@@ -938,7 +914,7 @@ class Ithemes_Sync_Functions {
 				ParagonIE_Sodium_Compat::$fastMult = $old_fastMult;
 
 				return $sodium_compat_is_fast;
-			}       
+			}
 		}
 
 		return true;
@@ -958,11 +934,8 @@ class Ithemes_Sync_Functions {
 				foreach ( $response_error->get_error_codes() as $code ) {
 					$errors_array[ $code ] = $response_error->get_error_message( $code );
 				}
-				ithemes_sync_send_urgent_notice(
-					'solid-security',
-					'vulnerability-resolution-failed',
-					'Solid Security',
-					'Solid Security',
+				solid_central_notify_server(
+					Central_Server_Notifier::NOTICE_VULNERABILITY_RESOLUTION_FAILED,
 					[
 						'vuln_id' => $vulnerability->get_id(),
 						'message' => $response_error->get_error_message(),
@@ -970,11 +943,8 @@ class Ithemes_Sync_Functions {
 					]
 				);
 			} else {
-				ithemes_sync_send_urgent_notice(
-					'solid-security',
-					'vulnerability-resolution',
-					'Solid Security',
-					'Solid Security',
+				solid_central_notify_server(
+					Central_Server_Notifier::NOTICE_VULNERABILITY_RESOLUTION,
 					[
 						'data'  => $response->get_data(),
 						'links' => $response->get_links(),
@@ -982,11 +952,8 @@ class Ithemes_Sync_Functions {
 				);
 			}
 		} else {
-			ithemes_sync_send_urgent_notice(
-				'solid-security',
-				'vulnerability-resolution-failed',
-				'Solid Security',
-				'Solid Security',
+			solid_central_notify_server(
+				Central_Server_Notifier::NOTICE_VULNERABILITY_RESOLUTION_FAILED,
 				[
 					'vuln_id' => $vulnerability->get_id(),
 					'message' => 'Unable to set current user to admin.',
@@ -1117,4 +1084,14 @@ class Ithemes_Sync_Functions {
             'rest_api'   => rest_url(),
         );
     }
+
+	/**
+	 * Checks if the current site is a StellarSite.
+	 *
+	 * @return bool Whether the current site is a StellarSite.
+	 */
+	public static function is_stellarsite()
+	{
+		return defined( 'StellarWP\StellarSites\PLUGIN_PATH' );
+	}
 }

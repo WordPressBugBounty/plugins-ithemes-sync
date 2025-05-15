@@ -1,5 +1,7 @@
 <?php
 
+use SolidWP\Central\Central_Server\Central_Server_Notifier;
+
 class Ithemes_Sync_Notices {
 
 	function __construct() {
@@ -21,7 +23,6 @@ class Ithemes_Sync_Notices {
 			add_action( 'upgrader_process_complete', [ $this, 'upgrader_process_complete' ], 10, 2 );
 
 			/* Backup Buddy */
-			add_action( 'backupbuddy_core_add_notification', [ $this, 'backupbuddy_core_add_notification' ] );
 			add_action( 'backupbuddy_run_remote_snapshot_response', [ $this, 'backupbuddy_run_remote_snapshot_response' ] );
 
 			/* iThemes Security */
@@ -33,25 +34,32 @@ class Ithemes_Sync_Notices {
 		}
 	}
 
-	function backupbuddy_core_add_notification( $notification ) {
-		if ( ! empty( $notification['slug'] ) && 'backup_success' == $notification['slug'] ) {
-			ithemes_sync_send_urgent_notice( 'backupbuddy', 'report', $notification['title'], $notification['message'], $notification );
-		}
-	}
-
 	function backupbuddy_run_remote_snapshot_response( $response ) {
 		if ( ! empty( $response['success'] ) ) {
 			$response['timestamp'] = time();
 			$response['slug']      = 'live_snapshot_success';
-			ithemes_sync_send_urgent_notice( 'backupbuddy', 'report', 'Snapshot Initiated', 'BackupBuddy Live Snapshot Initiated Successfully', $response );
+			solid_central_notify_server( Central_Server_Notifier::NOTICE_LIVE_SNAPSHOT_SUCCESS, $response );
 		}
 	}
 
 	function itsec_log_add( $data, $id, $log_type ) {
 		if ( ! empty( $data ) && is_array( $data ) ) {
-			if ( 'action' == $data['type']
-				|| ( 'process-stop' == $data['type'] && 'malware' == $data['module'] ) ) {
-				ithemes_sync_send_urgent_notice( 'ithemes-security', 'report', 'iThemes Security', 'iThemes Security', $data );
+			$type   = $data['type'] ?? '';
+			$module = $data['module'] ?? '';
+
+			if ( $type === 'process-stop' && $module === 'malware' ) {
+				solid_central_notify_server( Central_Server_Notifier::NOTICE_SECURITY_LOG, $data );
+				return;
+			}
+
+			if ( $type === 'action' && $module === 'lockout' ) {
+				// We delay notifications because it may cause too many requests to the Central server.
+				solid_central_add_notice( Central_Server_Notifier::NOTICE_SECURITY_LOG, $data );
+				return;
+			}
+
+			if ( $type === 'action' ) {
+				solid_central_notify_server( Central_Server_Notifier::NOTICE_SECURITY_LOG, $data );
 			}
 		}
 	}
@@ -60,25 +68,19 @@ class Ithemes_Sync_Notices {
 		$user       = $session->get_user();
 		$session_id = $session->get_id();
 		if ( $user && $session_id ) {
-			ithemes_sync_send_urgent_notice(
-				'ithemes-security',
-				'2fa',
-				'iThemes Security',
-				'iThemes Security',
+			solid_central_notify_server(
+				Central_Server_Notifier::NOTICE_SECURITY_2FA,
 				[
 					'user_id'    => $user->ID,
 					'session_id' => $session_id,
-				] 
+				]
 			);
 		}
 	}
 
 	function itsec_site_scan_completed( $scan, $site_id, $cached ) {
-		ithemes_sync_send_urgent_notice(
-			'solid-security',
-			'site-scan-complete',
-			'Solid Security',
-			'Site Scan Complete',
+		solid_central_notify_server(
+			Central_Server_Notifier::NOTICE_SITE_SCAN_COMPLETE,
 			[
 				'scan_id' => $scan->get_id(),
 			]
@@ -100,26 +102,26 @@ class Ithemes_Sync_Notices {
 			'shutdown',
 			function () use ( $vulnerability ) {
 				Ithemes_Sync_Functions::notify_on_itsec_vulnerability_update( $vulnerability );
-			} 
+			}
 		);
 	}
 
 	function core_updated_successfully( $wp_version ) {
 		$data['slug']    = 'wordpress_core_updated';
 		$data['version'] = $wp_version;
-		ithemes_sync_send_urgent_notice( 'wordpress-core', 'report', 'WordPress Updated', 'WordPress Updated', $data );
+		solid_central_notify_server( Central_Server_Notifier::NOTICE_CORE_UPDATED, $data );
 	}
 
 	function activated_plugin( $plugin_basename, $network_deactivating ) {
 		$data         = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin_basename, true, false );
 		$data['slug'] = 'wordpress_plugin_activated';
-		ithemes_sync_send_urgent_notice( 'wordpress-plugin', 'report', 'Plugin Activated', 'Plugin Activated', $data );
+		solid_central_notify_server( Central_Server_Notifier::NOTICE_PLUGIN_ACTIVATED, $data );
 	}
 
 	function deactivated_plugin( $plugin_basename, $network_deactivating ) {
 		$data         = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin_basename, true, false );
 		$data['slug'] = 'wordpress_plugin_deactivated';
-		ithemes_sync_send_urgent_notice( 'wordpress-plugin', 'report', 'Plugin Deactivated', 'Plugin Deactivated', $data );
+		solid_central_notify_server( Central_Server_Notifier::NOTICE_PLUGIN_DEACTIVATED, $data );
 	}
 
 	function delete_plugin( $plugin_file ) {
@@ -144,7 +146,7 @@ class Ithemes_Sync_Notices {
 		}
 		if ( $deleted ) {
 			$data['slug'] = 'wordpress_plugin_uninstalled';
-			ithemes_sync_send_urgent_notice( 'wordpress-plugin', 'report', 'Plugins Uninstalled', 'Plugins Uninstalled', $data );
+			solid_central_notify_server( Central_Server_Notifier::NOTICE_PLUGIN_UNINSTALLED, $data );
 		}
 	}
 
@@ -157,7 +159,7 @@ class Ithemes_Sync_Notices {
 		$data['slug']    = 'wordpress_theme_activated';
 		$data['name']    = $new_theme->get( 'Name' );
 		$data['version'] = $new_theme->get( 'Version' );
-		ithemes_sync_send_urgent_notice( 'wordpress-theme', 'report', 'Theme Activated', 'Theme Activated', $data );
+		solid_central_notify_server( Central_Server_Notifier::NOTICE_THEME_ACTIVATED, $data );
 	}
 
 	function delete_site_transient_update_themes( $transient ) {
@@ -168,7 +170,7 @@ class Ithemes_Sync_Notices {
 		$data         = [];
 		$data['slug'] = 'wordpress_theme_uninstalled';
 		$data['name'] = $_GET['stylesheet'];
-		ithemes_sync_send_urgent_notice( 'wordpress-theme', 'report', 'Theme Uninstalled', 'Theme Uninstalled', $data );
+		solid_central_notify_server( Central_Server_Notifier::NOTICE_THEME_UNINSTALLED, $data );
 	}
 
 	function upgrader_process_complete( $upgrader, $extra ) {
@@ -184,7 +186,7 @@ class Ithemes_Sync_Notices {
 
 				$data         = get_plugin_data( WP_PLUGIN_DIR . '/' . $slug, true, false );
 				$data['slug'] = 'wordpress_plugin_installed';
-				ithemes_sync_send_urgent_notice( 'wordpress-plugin', 'report', 'Plugin Installed', 'Plugin Installed', $data );
+				solid_central_notify_server( Central_Server_Notifier::NOTICE_PLUGIN_INSTALLED, $data );
 			}
 			if ( 'update' === $extra['action'] ) {
 				if ( ! empty( $extra['bulk'] ) && true == $extra['bulk'] ) {
@@ -199,7 +201,7 @@ class Ithemes_Sync_Notices {
 				foreach ( $slugs as $slug ) {
 					$data         = get_plugin_data( WP_PLUGIN_DIR . '/' . $slug, true, false );
 					$data['slug'] = 'wordpress_plugin_updated';
-					ithemes_sync_send_urgent_notice( 'wordpress-plugin', 'report', 'Plugin Updated', 'Plugin Updated', $data );
+					solid_central_notify_server( Central_Server_Notifier::NOTICE_PLUGIN_UPDATED, $data );
 				}
 			}
 		} elseif ( 'theme' === $extra['type'] ) {
@@ -212,7 +214,7 @@ class Ithemes_Sync_Notices {
 				$data['slug']    = 'wordpress_theme_installed';
 				$data['name']    = $theme->get( 'Name' );
 				$data['version'] = $theme->get( 'Version' );
-				ithemes_sync_send_urgent_notice( 'wordpress-theme', 'report', 'Theme Installed', 'Theme Installed', $data );
+				solid_central_notify_server( Central_Server_Notifier::NOTICE_THEME_INSTALLED, $data );
 			}
 			if ( 'update' === $extra['action'] ) {
 				if ( ! empty( $extra['bulk'] ) && true == $extra['bulk'] ) {
@@ -229,7 +231,7 @@ class Ithemes_Sync_Notices {
 					$theme           = wp_get_theme( $slug );
 					$data['name']    = $theme->get( 'Name' );
 					$data['version'] = $theme->get( 'Version' );
-					ithemes_sync_send_urgent_notice( 'wordpress-theme', 'report', 'Theme Updated', 'Theme Updated', $data );
+					solid_central_notify_server( Central_Server_Notifier::NOTICE_THEME_UPDATED, $data );
 				}
 			}
 		}
