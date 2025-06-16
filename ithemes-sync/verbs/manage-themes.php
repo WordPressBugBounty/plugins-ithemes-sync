@@ -208,7 +208,18 @@ class Ithemes_Sync_Verb_Manage_themes extends Ithemes_Sync_Verb {
 		$response = [];
 
 		foreach ( (array) $themes as $theme ) {
-			$response[ $theme ] = delete_theme( $theme );
+			$result = Ithemes_Sync_Functions::execute_with_display_fatal(
+				fn () => delete_theme( $theme )
+			);
+
+			if ( is_wp_error( $result ) ) {
+				$response[ $theme ] = [
+					'error' => rest_convert_error_to_response( $result )->data
+				];
+				continue;
+			}
+
+			$response[ $theme ] = $result;
 		}
 
 		return $response;

@@ -89,7 +89,7 @@ class Ithemes_Sync_Verb_Manage_Plugins extends Ithemes_Sync_Verb {
 			];
 		}
 
-		$result['install'] = $this->install_plugin(  $plugin );
+		$result['install'] = $this->install_plugin( $plugin );
 
 		if ( isset( $result['install'][ $plugin ] ) ) {
 			$result['install'] = $result['install'][ $plugin ];
@@ -125,9 +125,14 @@ class Ithemes_Sync_Verb_Manage_Plugins extends Ithemes_Sync_Verb {
 
 		$this->handled_activation = true;
 
-		$result = activate_plugin( $plugin );
+		$result = Ithemes_Sync_Functions::execute_with_display_fatal(
+			fn () => activate_plugin( $plugin )
+		);
+
 		if ( is_wp_error( $result ) ) {
-			return $result;
+			return [
+				'error' => rest_convert_error_to_response( $result )->data,
+			];
 		} else {
 			$result['data'] = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin, true, false );
 			return $result;
@@ -145,9 +150,14 @@ class Ithemes_Sync_Verb_Manage_Plugins extends Ithemes_Sync_Verb {
 
 		$this->handled_activation = true;
 
-		$result = activate_plugin( $plugin, '', true );
+		$result = Ithemes_Sync_Functions::execute_with_display_fatal(
+			fn () => activate_plugin( $plugin, '', true )
+		);
+
 		if ( is_wp_error( $result ) ) {
-			return $result;
+			return [
+				'error' => rest_convert_error_to_response( $result )->data,
+			];
 		} else {
 			$result['data'] = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin, true, false );
 			return $result;
@@ -224,10 +234,18 @@ class Ithemes_Sync_Verb_Manage_Plugins extends Ithemes_Sync_Verb {
 	private function uninstall_plugins( $plugins ) {
 		require_once ABSPATH . '/wp-admin/includes/file.php';
 
-		// First ensure that the plugins are deactivated.
-		$result = $this->deactivate_plugins( $plugins );
-		delete_plugins( (array) $plugins );
+		$response = $this->deactivate_plugins( $plugins );
 
-		return $result;
+		$result = Ithemes_Sync_Functions::execute_with_display_fatal(
+			fn () => delete_plugins( (array) $plugins )
+		);
+
+		if ( is_wp_error( $result ) ) {
+			return [
+				'error' => rest_convert_error_to_response( $result )->data,
+			];
+		}
+
+		return $response;
 	}
 }

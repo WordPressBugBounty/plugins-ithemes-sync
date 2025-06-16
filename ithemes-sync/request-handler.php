@@ -42,8 +42,6 @@ class Ithemes_Sync_Request_Handler {
 	private $options                 = [];
 	private $old_update_data         = [];
 	private $verb_time               = false;
-	public $original_display_errors  = '';
-	public $original_error_reporting = 32767;
 	private $request;
 
 	private function __construct() {}
@@ -73,8 +71,6 @@ class Ithemes_Sync_Request_Handler {
 	}
 
 	private function init_legacy_handler() {
-		$this->show_errors();
-
 		if ( empty( $_POST['request'] ) ) {
 			return;
 		}
@@ -149,36 +145,10 @@ class Ithemes_Sync_Request_Handler {
 
 		Ithemes_Sync_Functions::set_time_limit( 60 );
 
-		$this->set_is_admin_to_true();
 		$this->set_current_user_to_admin();
 		$this->set_full_user_capabilities();
 		$this->disable_ext_object_cache();
 		$this->disable_2fa_verification();
-	}
-
-	private function show_errors() {
-		$this->original_display_errors  = ini_set( 'display_errors', 1 );
-		$this->original_error_reporting = error_reporting( E_ALL );
-	}
-
-	private function restore_error_settings() {
-		ini_set( 'display_errors', $this->original_display_errors );
-		error_reporting( $this->original_error_reporting );
-	}
-
-	private function hide_errors() {
-		ini_set( 'display_errors', 0 );
-		error_reporting( null );
-	}
-
-	private function set_is_admin_to_true() {
-		if ( defined( 'ITHEMES_SYNC_SKIP_SET_IS_ADMIN_TO_TRUE' ) && ITHEMES_SYNC_SKIP_SET_IS_ADMIN_TO_TRUE ) {
-			return;
-		}
-
-		if ( ! defined( 'WP_ADMIN' ) ) {
-			define( 'WP_ADMIN', true );
-		}
 	}
 
 	private function disable_ext_object_cache() {
@@ -405,8 +375,6 @@ class Ithemes_Sync_Request_Handler {
 
 		echo "\n\nv56CHRcOT+%K\$fk[*CrQ9B5<~9T=h?xx9C</`Sqv;M{Q0ms:FR0w\n\n$json";
 
-		$this->hide_errors();
-
 		remove_action( 'shutdown', [ $this, 'handle_error' ] );
 
 		exit;
@@ -604,5 +572,3 @@ class Ithemes_Sync_Request_Handler {
 		return sodium_crypto_sign_verify_detached( $signature, $request, $public_key );
 	}
 }
-
-Ithemes_Sync_Request_Handler::for_legacy_request();

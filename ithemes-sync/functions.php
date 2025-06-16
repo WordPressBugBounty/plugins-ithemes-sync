@@ -34,6 +34,8 @@ Version History
 use SolidWP\Central\Central_Server\Central_Server_Notifier;
 
 class Ithemes_Sync_Functions {
+	const FATAL_ERROR_LEVEL = E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_ERROR | E_WARNING | E_PARSE | E_USER_ERROR | E_USER_WARNING | E_RECOVERABLE_ERROR;
+
 	public static function get_url( $path ) {
 		$path           = str_replace( '\\', '/', $path );
 		$wp_content_dir = str_replace( '\\', '/', WP_CONTENT_DIR );
@@ -316,7 +318,7 @@ class Ithemes_Sync_Functions {
 
 	public static function get_update_details( $args = [] ) {
 		$default_args = [
-			'verbose'       => false,
+			'verbose' => false,
 		];
 		$args         = array_merge( $default_args, $args );
 
@@ -434,8 +436,8 @@ class Ithemes_Sync_Functions {
 	}
 
 	public static function get_php_details( $args = [] ) {
-		$details['display_errors']  = $GLOBALS['ithemes_sync_request_handler']->original_display_errors;
-		$details['error_reporting'] = $GLOBALS['ithemes_sync_request_handler']->original_error_reporting;
+		$details['display_errors']  = ini_get( 'display_errors' );
+		$details['error_reporting'] = error_reporting();
 
 		if ( self::is_callable_function( 'ini_get' ) ) {
 			$details['disable_functions']               = ini_get( 'disable_functions' );
@@ -1054,44 +1056,67 @@ class Ithemes_Sync_Functions {
 		return true;
 	}
 
-    /**
-     * Generate a WP App Password.
-     *
-     * @param WP_User $user A WP_User object.
-     * @param string  $name The app name.
-     *
-     * @return array|\WP_Error
-     */
-    public static function generate_app_password( $user ) {
+	/**
+	 * Generate a WP App Password.
+	 *
+	 * @param WP_User $user A WP_User object.
+	 * @param string  $name The app name.
+	 *
+	 * @return array|\WP_Error
+	 */
+	public static function generate_app_password( $user ) {
 
-        // Create the app password.
-        $app_password = WP_Application_Passwords::create_new_application_password(
-            $user->ID,
-            array(
-                'name'   => 'SolidWP ' . date_i18n( 'M j, Y g:i:s A' ),
-                'app_id' => SOLID_CENTRAL_APP_ID,
-            )
-        );
+		// Create the app password.
+		$app_password = WP_Application_Passwords::create_new_application_password(
+			$user->ID,
+			[
+				'name'   => 'SolidWP ' . date_i18n( 'M j, Y g:i:s A' ),
+				'app_id' => SOLID_CENTRAL_APP_ID,
+			]
+		);
 
-        if ( is_wp_error( $app_password ) ) {
-            return $app_password;
-        }
+		if ( is_wp_error( $app_password ) ) {
+			return $app_password;
+		}
 
-        return array(
-            'user_login' => $user->user_login,
-            'password'   => $app_password[0],
-            'details'    => $app_password[1],
-            'rest_api'   => rest_url(),
-        );
-    }
+		return [
+			'user_login' => $user->user_login,
+			'password'   => $app_password[0],
+			'details'    => $app_password[1],
+			'rest_api'   => rest_url(),
+		];
+	}
 
 	/**
 	 * Checks if the current site is a StellarSite.
 	 *
 	 * @return bool Whether the current site is a StellarSite.
 	 */
-	public static function is_stellarsite()
-	{
+	public static function is_stellarsite() {
 		return defined( 'StellarWP\StellarSites\PLUGIN_PATH' );
+	}
+
+	/**
+	 * Executes a callback function with display of PHP fatal errors.
+	 *
+	 * Some WordPress core functions expect `display_errors` to be set to `true`,
+	 * in which, errors are scraped from the output and used to build a `WP_Error`.
+	 *
+	 * @param callable $callback The callback function to execute.
+	 *
+	 * @return mixed The result of the callback function, possibly a `WP_Error`.
+	 */
+	public static function execute_with_display_fatal( $callback ) {
+		$previous_error_reporting = error_reporting( self::FATAL_ERROR_LEVEL );
+		$previous_display_errors  = ini_get( 'display_errors' );
+
+		ini_set( 'display_errors', 1 );
+
+		$result = $callback();
+
+		error_reporting( $previous_error_reporting );
+		ini_set( 'display_errors', $previous_display_errors );
+
+		return $result;
 	}
 }

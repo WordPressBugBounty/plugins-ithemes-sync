@@ -281,3 +281,7 @@
 	Enhancement: Improve refresh of upgrades compatiblity with 3rd party plugins and themes.
 	Enhancement: Refactor connection and notification to use new Central server Plugin API.
 	Enhancement: Add StellarSite detection and update settings page.
+3.2.5 - 2025-06-11 - John Hooks
+	Bug Fix: Prevent bulk updates failing with "no-update" error after the first update.
+	Bug Fix: Prevent PHP warnings from being displayed during WP REST API requests.
+	Tweak: Remove logic that sets WP_ADMIN to true during verb request handling to avoid plugin conflicts.

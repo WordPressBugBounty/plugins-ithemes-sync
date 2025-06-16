@@ -4,7 +4,7 @@ Tags: manage multiple websites, backup, security, manage updates, report dashboa
 Requires at least: 6.4
 Requires PHP: 7.0
 Tested up to: 6.8
-Stable tag: 3.2.4
+Stable tag: 3.2.5
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/quick-guide-gplv3.html
 
@@ -129,6 +129,11 @@ Solid Central includes an automatic “Add Site” prompt when you first login t
 Got more questions? [Contact us!](https://solidwp.com/contact.)
 
 == Changelog ==
+
+= 3.2.5 =
+* Bug Fix: Prevent bulk updates failing with "no-update" error after the first update.
+* Bug Fix: Prevent PHP warnings from being displayed during WP REST API requests.
+* Tweak: Remove logic that sets WP_ADMIN to true during verb request handling to avoid plugin conflicts.
 
 = 3.2.4 =
 * New: Add WP REST verb endpoint for improved refresh of site data.

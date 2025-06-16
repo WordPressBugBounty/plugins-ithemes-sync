@@ -16,6 +16,7 @@ if ( ! defined( 'SOLID_CENTRAL_APP_ID' ) ) {
  */
 function ithemes_sync_load_request_handler() {
 	require_once $GLOBALS['ithemes_sync_path'] . '/request-handler.php';
+	Ithemes_Sync_Request_Handler::for_legacy_request();
 }
 
 if ( ! empty( $_GET['ithemes-sync-request'] ) ) {

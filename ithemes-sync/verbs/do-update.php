@@ -24,7 +24,11 @@ class Ithemes_Sync_Verb_Do_Update extends Ithemes_Sync_Verb {
 	public static $name        = 'do-update';
 	public static $description = 'Update WordPress, plugins, and themes.';
 
-	private $default_arguments = [];
+	private $default_arguments = [
+		'bulk_upgrade_args' => [
+			'clear_update_cache' => false,
+		],
+	];
 	private $original_update_details;
 	private $skin;
 
@@ -47,10 +51,10 @@ class Ithemes_Sync_Verb_Do_Update extends Ithemes_Sync_Verb {
 		$response = [];
 
 		if ( ! empty( $arguments['plugin'] ) ) {
-			$response['plugin'] = $this->do_plugin_upgrade( $arguments['plugin'] );
+			$response['plugin'] = $this->do_plugin_upgrade( $arguments['plugin'], $arguments['bulk_upgrade_args'] );
 		}
 		if ( ! empty( $arguments['theme'] ) ) {
-			$response['theme'] = $this->do_theme_upgrade( $arguments['theme'] );
+			$response['theme'] = $this->do_theme_upgrade( $arguments['theme'], $arguments['bulk_upgrade_args'] );
 		}
 		if ( ! empty( $arguments['core'] ) ) {
 			$response['core'] = $this->do_core_upgrade( $arguments['core'] );
@@ -185,15 +189,41 @@ class Ithemes_Sync_Verb_Do_Update extends Ithemes_Sync_Verb {
 		return $response;
 	}
 
-	public function do_plugin_upgrade( $plugins ) {
-		return $this->do_bulk_upgrade( $plugins, 'plugin' );
+	/**
+	 * Preform a bulk upgrade operation for a set of plugins.
+	 *
+	 * @param array $plugins An array of plugin identifiers to upgrade.
+	 * @param array $args    Arguments for the upgrade skin bulk_upgrade method.
+	 *
+	 * @return array|WP_Error The result of the bulk upgrade operation.
+	 */
+	public function do_plugin_upgrade( $plugins, $args ) {
+		return $this->do_bulk_upgrade( $plugins, 'plugin', $args );
 	}
 
-	public function do_theme_upgrade( $themes ) {
-		return $this->do_bulk_upgrade( $themes, 'theme' );
+	/**
+	 * Preform a bulk upgrade operation for a set of themes.
+	 *
+	 * @param array $themes An array of theme identifiers to upgrade.
+	 * @param array $args   Arguments for the upgrade skin bulk_upgrade method.
+	 *
+	 * @return array|WP_Error The result of the bulk upgrade operation.
+	 */
+	public function do_theme_upgrade( $themes, $args ) {
+		return $this->do_bulk_upgrade( $themes, 'theme', $args );
 	}
 
-	private function do_bulk_upgrade( $packages, $type ) {
+	/**
+	 * Performs a bulk upgrade operation for plugins or themes.
+	 *
+	 * @param array  $packages An array of package identifiers (plugins or themes) to be upgraded.
+	 * @param string $type     The type of items to upgrade ('plugin' or 'theme').
+	 * @param array  $args     Arguments for the upgrade skin bulk_upgrade method.
+	 *
+	 * @return array|WP_Error An associative array with upgrade results, including success statuses and errors,
+	 *                        or a WP_Error instance if the operation fails due to an unrecognized type.
+	 */
+	private function do_bulk_upgrade( $packages, $type, $args ) {
 		if ( ! in_array( $type, [ 'plugin', 'theme' ] ) ) {
 			return new WP_Error( 'unrecognized-bulk-upgrade-type', "An unrecognized type ($type) was passed to do_bulk_upgrade()." );
 		}
@@ -218,10 +248,10 @@ class Ithemes_Sync_Verb_Do_Update extends Ithemes_Sync_Verb {
 
 		if ( 'plugin' === $type ) {
 			$upgrader = new Plugin_Upgrader( $this->skin );
-			$result   = $upgrader->bulk_upgrade( $packages );
+			$result   = $upgrader->bulk_upgrade( $packages, $args );
 		} else {
 			$upgrader = new Theme_Upgrader( $this->skin );
-			$result   = $upgrader->bulk_upgrade( $packages );
+			$result   = $upgrader->bulk_upgrade( $packages, $args );
 		}
 
 		if ( is_wp_error( $result ) ) {
