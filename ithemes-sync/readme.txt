@@ -4,7 +4,7 @@ Tags: manage multiple websites, backup, security, manage updates, report dashboa
 Requires at least: 6.4
 Requires PHP: 7.0
 Tested up to: 6.8
-Stable tag: 3.2.5
+Stable tag: 3.2.6
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/quick-guide-gplv3.html
 
@@ -129,6 +129,9 @@ Solid Central includes an automatic “Add Site” prompt when you first login t
 Got more questions? [Contact us!](https://solidwp.com/contact.)
 
 == Changelog ==
+
+= 3.2.6 =
+* New: Development and staging sites no longer take up a separate license. Learn more: https://solidwp.com/blog/seamless-solidwp-licensing-across-all-your-environments/
 
 = 3.2.5 =
 * Bug Fix: Prevent bulk updates failing with "no-update" error after the first update.

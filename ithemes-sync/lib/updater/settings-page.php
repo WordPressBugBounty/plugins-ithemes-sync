@@ -370,6 +370,7 @@ class Ithemes_Updater_Settings_Page {
 		$unrecognized = array();
 		$patchstack_quota = array();
 		$has_patchstack = false;
+		$is_staging = false;
 
 		foreach ( $packages as $path => $data ) {
 			$name = Ithemes_Updater_Functions::get_package_name( $data['package'] );
@@ -381,6 +382,10 @@ class Ithemes_Updater_Settings_Page {
 				$licensed[$name] = $data;
 			} else {
 				$unrecognized[$name] = $data;
+			}
+
+			if ( isset( $data['is_staging'] ) && $data['is_staging'] ) {
+				$is_staging = true;
 			}
 		}
 
@@ -407,7 +412,7 @@ class Ithemes_Updater_Settings_Page {
 			<div class="solidwp-licensing-wrap-header">
 				<h2><?php _e( 'SolidWP Licensing', 'it-l10n-ithemes-sync' ); ?></h2>
 
-				<?php $this->show_notices(); ?>
+				<?php $this->show_notices( $is_staging ); ?>
 			</div>
 
 		<?php
@@ -864,11 +869,13 @@ class Ithemes_Updater_Settings_Page {
 
 ?>
 	<div class="ithemes-updater-products" id="ithemes-updater-unrecognized">
-		<h3 class="subtitle"><?php _e( 'Unrecognized Products', 'it-l10n-ithemes-sync' ); ?></h3>
-
-		<p><?php _e( 'The following products were not recognized by the licensing system. This can be due to a bug in the product code, a temporary server issue, or because the product is no longer supported.', 'it-l10n-ithemes-sync' ); ?></p>
-		<p><?php printf( __( 'Please check this page again at a later time to see if the problem resolves itself. If the product remains, please contact <a href="%s">SolidWP support</a> and provide them with the details given below.', 'it-l10n-ithemes-sync' ), 'https://solidwp.com/support/' ); ?></p>
-
+		<div class="solidwp-table-header">
+			<div>
+				<h3><?php _e( 'Unrecognized Products', 'it-l10n-ithemes-sync' ); ?></h3>
+				<p><?php _e( 'The following products were not recognized by the licensing system. This can be due to a bug in the product code, a temporary server issue, or because the product is no longer supported.', 'it-l10n-ithemes-sync' ); ?></p>
+				<p><?php printf( __( 'Please check this page again at a later time to see if the problem resolves itself. If the product remains, please contact <a href="%s">SolidWP support</a> and provide them with the details given below.', 'it-l10n-ithemes-sync' ), 'https://solidwp.com/support/' ); ?></p>
+			</div>
+		</div>
 		<table class="ithemes-updater-listing widefat">
 			<thead>
 				<tr>
@@ -1176,7 +1183,11 @@ class Ithemes_Updater_Settings_Page {
 	}
 
 
-	private function show_notices() {
+	private function show_notices( $is_staging = false ) {
+		if ( $is_staging) {
+			echo "<div class=\"updated\"><p><strong>" . __( 'As a staging site, licenses for the products and services listed below do not count toward your license usage.', 'it-l10n-ithemes-sync' ) . "</strong></p></div>\n";
+		}
+
 		if ( ! empty( $this->messages ) ) {
 			foreach ( $this->messages as $message ) {
 				echo "<div class=\"updated fade\"><p><strong>$message</strong></p></div>\n";

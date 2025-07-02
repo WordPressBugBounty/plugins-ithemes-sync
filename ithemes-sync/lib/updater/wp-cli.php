@@ -107,6 +107,7 @@ final class Ithemes_Updater_WP_CLI_Ithemes_Licensing extends WP_CLI_Command {
 					'link_expire',
 					'link',
 					'key',
+					'is_staging',
 					'error',
 				);
 			} else {

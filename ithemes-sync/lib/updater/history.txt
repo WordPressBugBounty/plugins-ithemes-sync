@@ -91,6 +91,9 @@
 	Tweak: Remove the ability to fallback to a non-https connection to the SolidWP API.
 1.8.5 - 2024-04-22 - Timothy Jacobs
 	Bug Fix: Activating a Patchstack license on sites with a www. subdomain would not show the license as active.
-1.8.6 - ??? - Jared Hill
+1.8.6 - 2024-07-31 - Jared Hill
 	Bug Fix: Don't list "empty" patchstack sites.
 	Bug Fix: Resolve PHP warnings when using WP-CLI.
+1.9.0 - 2025-07-02 - John Hooks
+	Enhancement: Add environment licensing notice.
+	Enhancement: Add `is_staging` to verbose output of `wp ithemes-licensing show` WP-CLI command.

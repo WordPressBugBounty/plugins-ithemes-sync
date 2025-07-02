@@ -71,7 +71,7 @@ class Auth extends \WP_REST_Controller {
 					'type' => [
 						'type'     => 'string',
 						'required' => true,
-						'enum'     => [ 'dashboard', 'backups-onboard', 'central-onboard', 'suite-onboard' ],
+						'enum'     => [ 'dashboard', 'backups-onboard', 'central-onboard', 'mail-onboard', 'suite-onboard' ],
 					],
 				],
 			]

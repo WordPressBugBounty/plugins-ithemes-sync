@@ -119,6 +119,7 @@ class Ithemes_Updater_Packages {
 					'sub_expire'     => 'expiration',
 					'upgrade'        => 'upgrade',
 					'wp_update_data' => 'wp_update_data',
+					'is_staging'     => 'is_staging',
 				);
 
 				foreach ( $key_map as $old => $new ) {

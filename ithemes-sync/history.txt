@@ -285,3 +285,5 @@
 	Bug Fix: Prevent bulk updates failing with "no-update" error after the first update.
 	Bug Fix: Prevent PHP warnings from being displayed during WP REST API requests.
 	Tweak: Remove logic that sets WP_ADMIN to true during verb request handling to avoid plugin conflicts.
+3.2.6 - 2025-07-02 - John Hooks
+	New: Development and staging sites no longer take up a separate license. Learn more: https://solidwp.com/blog/seamless-solidwp-licensing-across-all-your-environments/
