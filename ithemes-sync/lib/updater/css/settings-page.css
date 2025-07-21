@@ -2,11 +2,6 @@
 	padding-left: 0;
 }
 
-#icon-options-general,
-#icon-settings {
-	background: url('../images/logo-solid-wp.png') no-repeat;
-}
-
 .solidwp-licensing-wrap {
 	display: -webkit-box;
 	display: -webkit-flex;
@@ -504,64 +499,4 @@ table.widefat {
 .check-column:hover input:where(:not(:disabled)),
 .check-column input:where(:not(:disabled)):hover {
 	box-shadow: none;
-}
-
-.solidwp-sunset-banner {
-	width: 100%;
-	max-width: 1680px;
-	box-sizing: border-box;
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	align-items: flex-start;
-	gap: 2rem;
-	margin: 0 auto;
-	padding: 1.7rem 1.25rem;
-	border-radius: 0.25rem;
-	background-color: #232323;
-	background-image: url("../images/sunset-background.png");
-	background-repeat: no-repeat;
-	background-size: 100% 100%;
-}
-
-.solidwp-sunset-banner .solidwp-sunset-text-small {
-	font-size: 0.813rem;
-	color: #e7e7e7;
-}
-
-.solidwp-sunset-banner .solidwp-sunset-text-large {
-	font-size: 1.25rem;
-	color: #fff;
-}
-
-.solidwp-sunset-banner a.solidwp-sunset-learn-more {
-	background: #fff;
-	box-shadow: 0px 0px 25px 5px rgba(247, 245, 240, 0.5);
-	border-radius: 100px;
-	border: none;
-	padding: 10px 20px;
-	color: #1f1f1f;
-	font-weight: 500;
-	font-size: 1rem;
-	width: fit-content;
-	text-decoration: none;
-}
-
-@media screen and (min-width: 600px) {
-	.solidwp-sunset-banner {
-		flex-direction: row;
-		align-items: center;
-	}
-}
-
-@media screen and (min-width: 783px) {
-	.solidwp-sunset-banner .solidwp-sunset-text-large {
-		font-size: 1.5rem;
-	}
-}
-
-@media screen and (min-width: 960px) {
-	.solidwp-sunset-banner {
-		padding: 2.25rem 4rem;
-	}
 }

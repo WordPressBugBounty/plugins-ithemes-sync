@@ -97,3 +97,7 @@
 1.9.0 - 2025-07-02 - John Hooks
 	Enhancement: Add environment licensing notice.
 	Enhancement: Add `is_staging` to verbose output of `wp ithemes-licensing show` WP-CLI command.
+1.9.1 - 2025-07-14 - Lisa Canini
+	Enhancement: Update SolidWP logo.
+1.9.2 - 2025-07-21 - Lisa Canini
+	Tweak: Remove banner when running sunset products.

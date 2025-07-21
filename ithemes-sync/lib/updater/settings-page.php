@@ -405,7 +405,7 @@ class Ithemes_Updater_Settings_Page {
 		}
 ?>
 	<div class="solidwp-licensing-page-header">
-		<img src="<?php echo esc_attr( $this->path_url . '/images/solid_wp_logo.svg' ); ?>" />
+		<img src="<?php echo esc_attr( $this->path_url . '/images/logo-solidwp.svg' ); ?>" />
 	</div>
 	<div class="solidwp-licensing">
 		<div class="solidwp-licensing-wrap">
@@ -416,7 +416,6 @@ class Ithemes_Updater_Settings_Page {
 			</div>
 
 		<?php
-			$this->show_sunset_banner( $packages );
 			$this->list_licensed_products( $licensed, $post_data, $action );
 			if ( $has_patchstack ) {
 				if ( ( $security_package['total'] > 0 || $security_package['total'] == -1 ) && $patchstack_quota['total'] > 0 ) {
@@ -492,33 +491,6 @@ class Ithemes_Updater_Settings_Page {
 	</form>
 <?php
 
-	}
-
-	private function show_sunset_banner( $packages ) {
-		$sunset_slugs = array_flip( include __DIR__ . '/sunset-packages.php' );
-
-		$sunset = [];
-
-		foreach ( $packages as $package ) {
-			if ( isset( $sunset_slugs[ $package['package'] ] ) ) {
-				$sunset[] = $package['package'];
-			}
-		}
-
-		if ( ! $sunset ) {
-			return;
-		}
-
-		if ( count( $sunset ) === 1 ) {
-			$sunset_text = sprintf(
-				__( '%s is being Sunset, but we have alternatives for you!', 'it-l10n-ithemes-sync' ),
-				Ithemes_Updater_Functions::get_package_name( $sunset[0] )
-			);
-		} else {
-			$sunset_text = __( 'iThemes plugins are being Sunset, but we have alternatives for you!', 'it-l10n-ithemes-sync' );
-		}
-
-		include __DIR__ . '/sunset-banner.php';
 	}
 
 	private function list_licensed_products( $products, $post_data, $action ) {
@@ -946,7 +918,7 @@ class Ithemes_Updater_Settings_Page {
 ?>
 	<div class="wrap" id="ithemes-updater-site-url-confirmation">
 		<div class="solidwp-licensing-page-header">
-			<img src="<?php echo esc_attr( $this->path_url . '/images/solid_wp_logo.svg' ); ?>" />
+			<img src="<?php echo esc_attr( $this->path_url . '/images/logo-solidwp.svg' ); ?>" />
 		</div>
 		<div class="solidwp-licensing">
 			<div class="solidwp-licensing-wrap">
@@ -1060,7 +1032,7 @@ class Ithemes_Updater_Settings_Page {
 ?>
 	<div class="wrap" id="ithemes-updater-relicense">
 		<div class="solidwp-licensing-page-header">
-			<img src="<?php echo esc_attr( $this->path_url . '/images/solid_wp_logo.svg' ); ?>" />
+			<img src="<?php echo esc_attr( $this->path_url . '/images/logo-solidwp.svg' ); ?>" />
 		</div>
 		<div class="solidwp-licensing-wrap">
 			<h2><?php _e( 'Licensing', 'it-l10n-ithemes-sync' ); ?></h2>
