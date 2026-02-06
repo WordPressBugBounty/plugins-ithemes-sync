@@ -128,19 +128,20 @@ add_action( 'ithemes_updater_register', 'ithemes_sync_updater_register' );
 require $GLOBALS['ithemes_sync_path'] . '/lib/updater/load.php';
 
 /**
- * Whitelist the Central Server IP addresses in Solid Security to prevent
- * Central from being blacklisted by a customer on their own site
+ * Trust the Central Server IP addresses in Solid Security to allow
+ * Central to perform requests to the customer's site
  *
- * @param array<int,string> $white_ips The IPs to filter.
+ * @param array<int,string> $trusted_ips The IPs to filter.
  *
- * @return array<int,string> The filtered Solid Security whitelisted IPs.
+ * @return array<int,string> The filtered Solid Security trusted IPs.
  */
-function ithemes_sync_itsec_white_ips( array $white_ips ): array {
-	$white_ips[] = '69.167.144.237';
-	$white_ips[] = '54.159.83.156';
-	return $white_ips;
+function solid_central_solid_security_trusted_ips( array $trusted_ips ): array {
+	$trusted_ips[] = '207.246.254.118';
+	$trusted_ips[] = '207.246.255.233';
+	$trusted_ips[] = '207.246.255.133';
+	return $trusted_ips;
 }
-add_filter( 'itsec_white_ips', 'ithemes_sync_itsec_white_ips' );
+add_filter( 'solid_security_trusted_ips', 'solid_central_solid_security_trusted_ips' );
 
 /**
  * Solid Central login `init` action callback.

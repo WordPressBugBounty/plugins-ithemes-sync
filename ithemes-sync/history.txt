@@ -289,3 +289,5 @@
 	New: Development and staging sites no longer take up a separate license. Learn more: https://solidwp.com/blog/seamless-solidwp-licensing-across-all-your-environments/
 3.2.7 - 2025-07-21 - Lisa Canini
 	Tweak: Update SolidWP logo
+3.2.8 - 2025-10-21 - Lisa Canini
+	New: Add filter to return Central IPs.
