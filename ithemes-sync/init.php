@@ -4,7 +4,7 @@
  * Plugin URI: https://solidwp.com/central
  * Description: Maximize and amplify your admin with remote, multi-site management. One centralized dashboard to save time.
  * Author: SolidWP
- * Version: 3.2.8
+ * Version: 3.2.9
  * Requires at least: 6.4
  * Requires PHP: 7.0
  * Author URI: https://solidwp.com/

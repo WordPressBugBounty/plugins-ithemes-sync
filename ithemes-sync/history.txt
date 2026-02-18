@@ -291,3 +291,5 @@
 	Tweak: Update SolidWP logo
 3.2.8 - 2025-10-21 - Lisa Canini
 	New: Add filter to return Central IPs.
+3.2.9 - 2026-02-18 - John Hooks
+	Retired: Retired post/page duplication functionality.

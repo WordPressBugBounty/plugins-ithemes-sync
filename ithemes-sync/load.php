@@ -30,7 +30,6 @@ if ( is_admin() ) {
 require_once $GLOBALS['ithemes_sync_path'] . '/functions.php';
 require_once $GLOBALS['ithemes_sync_path'] . '/client-dashboard.php';
 require_once $GLOBALS['ithemes_sync_path'] . '/notices.php';
-require_once $GLOBALS['ithemes_sync_path'] . '/duplicator.php';
 require_once $GLOBALS['ithemes_sync_path'] . '/src/Admin_Post/Admin_Post_Handler.php';
 require_once $GLOBALS['ithemes_sync_path'] . '/src/Central_Server/Central_Server_Client.php';
 require_once $GLOBALS['ithemes_sync_path'] . '/src/Central_Server/Central_Server_Notifier.php';
@@ -139,6 +138,7 @@ function solid_central_solid_security_trusted_ips( array $trusted_ips ): array {
 	$trusted_ips[] = '207.246.254.118';
 	$trusted_ips[] = '207.246.255.233';
 	$trusted_ips[] = '207.246.255.133';
+	$trusted_ips[] = '207.246.255.60';
 	return $trusted_ips;
 }
 add_filter( 'solid_security_trusted_ips', 'solid_central_solid_security_trusted_ips' );
@@ -171,12 +171,6 @@ function ithemes_sync_login() {
 					break;
 				case 'editpost':
 					$path = 'post.php?post=' . $option['path_data'] . '&action=edit';
-					break;
-				case 'duplicatepost':
-					list(
-						$post_id,
-						$post_type ) = explode( '-', $option['path_data'] );
-					$path            = 'post-new.php?post_type=' . $post_type . '&ithemes-sync-duplicate-post-id=' . $post_id;
 					break;
 				case 'addpage':
 					$path = 'post-new.php?post_type=page';

@@ -4,7 +4,7 @@ Tags: manage multiple websites, backup, security, manage updates, report dashboa
 Requires at least: 6.4
 Requires PHP: 7.0
 Tested up to: 6.8
-Stable tag: 3.2.8
+Stable tag: 3.2.9
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/quick-guide-gplv3.html
 
@@ -25,8 +25,7 @@ What can you do quickly and easily with Solid Central?
 * **Bulk Install Themes and Plugins From WordPress.org or Zip Upload** – Search and install from WordPress.org and view your WordPress.org profile favorites. Upload theme or plugin zip files or install themes and plugins directly from your Solid Central membership.
 * **WordPress Uptime Monitoring** – Monitor WordPress uptime, downtime & overall performance for all your WordPress websites. Get notification emails when sites go down and view a history of your overall WordPress performance. View uptime stats such as total uptime percentage, total downtime, and number of downtimes for WordPress performance monitoring.
 * **WordPress Post & Page Manager** – View a list of current posts and pages on your site, including the title, author, date last modified, focus keyword, SEO score and SEO readability.
-* **Duplicate Pages & Posts Remotely** – Once clicked, you’ll be taken to a new, duplicate post or page on your website.
-Remotely Login to WordPress & Switch Between User Accounts – Quickly jump to the WordPress Admin dashboard of your WordPress site where you’ll be instantly logged in from Solid Central. You can also switch between any WordPress user account registered on the site without sharing password info.
+* **Remotely Login to WordPress & Switch Between User Accounts** – Quickly jump to the WordPress Admin dashboard of your WordPress site where you’ll be instantly logged in from Solid Central. You can also switch between any WordPress user account registered on the site without sharing password info.
 * **WordPress Comment Manager** – View all comments (all, approved, pending, spam, trash) and unapprove, mark as spam, or move comments to trash.
 * **WordPress Database Optimizations**  – Make sure your WordPress sites are running efficiently with WordPress optimizations. Central handles actions like cleaning out post revisions, spam comments and more.
 * **SEO Checker + Google Analytics & Google Search Console Reports** – Track key SEO metrics with Central’s SEO Checker and Google Analytics & Google Search Console integration. Central integrates with the Yoast SEO plugin to give you an overview of the health of your SEO efforts.
@@ -130,8 +129,11 @@ Got more questions? [Contact us!](https://solidwp.com/contact.)
 
 == Changelog ==
 
+= 3.2.9 =
+* Retired: Retired post/page duplication functionality.
+
 = 3.2.8 =
-* New: Add filter to return Central IPs. 
+* New: Add filter to return Central IPs.
 
 = 3.2.7 =
 * Tweak: Update SolidWP logo

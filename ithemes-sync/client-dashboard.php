@@ -330,7 +330,7 @@ class Ithemes_Sync_Client_Dashboard {
 			[
 				'blog_id' => get_current_blog_id(),
 				'fields'  => [ 'ID' ],
-			] 
+			]
 		);
 		$meta_key = 'ithemes-sync-admin-bar-items-' . get_current_blog_id();
 		foreach ( $users as $user ) {
@@ -352,7 +352,7 @@ class Ithemes_Sync_Client_Dashboard {
 				[
 					'blog_id' => 0,
 					'fields'  => [ 'ID' ],
-				] 
+				]
 			);
 			foreach ( $wpdb->get_col( $query ) as $blog_id ) {
 				delete_blog_option( $blog_id, 'ithemes-sync-admin_menu' );
@@ -366,22 +366,49 @@ class Ithemes_Sync_Client_Dashboard {
 		}
 	}
 
-	public function dashboard_admin_footer() {
+	public function dashboard_admin_footer(): void {
+		global $wp_meta_boxes;
+
 		$meta_box_list = get_option( 'ithemes-sync-dashboard-metaboxes' );
-		if ( false === $meta_box_list ) {
-			global $wp_meta_boxes;
-			$screen        = get_current_screen();
-			$meta_box_list = [];
-			foreach ( $wp_meta_boxes[ $screen->id ] as $box_position ) {
-				foreach ( $box_position as $box_set ) {
-					foreach ( $box_set as $box ) {
-						$meta_box_list[ $box['id'] ] = $box['title'];
+		if ( is_array( $meta_box_list ) ) {
+			return;
+		}
+
+		$screen = get_current_screen();
+		if ( ! $screen instanceof WP_Screen ) {
+			return;
+		}
+
+		if ( $screen->id !== 'dashboard' ) {
+			return;
+		}
+
+		$screen_meta_boxes = (array) ( $wp_meta_boxes[ $screen->id ] ?? [] );
+		$meta_box_list     = [];
+		foreach ( $screen_meta_boxes as $box_position ) {
+			if ( ! is_array( $box_position ) ) {
+				continue;
+			}
+
+			foreach ( $box_position as $box_set ) {
+				if ( ! is_array( $box_set ) ) {
+					continue;
+				}
+
+				foreach ( $box_set as $box ) {
+					$id    = (string) ( $box['id'] ?? '' );
+					$title = (string) ( $box['title'] ?? '' );
+					if ( $id === '' || $title === '' ) {
+						continue;
 					}
+
+					$meta_box_list[ $id ] = $title;
 				}
 			}
-			$meta_box_list['show_welcome_panel'] = _x( 'Welcome', 'Welcome panel' );
-			update_option( 'ithemes-sync-dashboard-metaboxes', $meta_box_list );
 		}
+
+		$meta_box_list['show_welcome_panel'] = _x( 'Welcome', 'Welcome panel' );
+		update_option( 'ithemes-sync-dashboard-metaboxes', $meta_box_list );
 	}
 
 	/**
