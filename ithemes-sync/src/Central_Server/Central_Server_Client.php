@@ -35,7 +35,7 @@ class Central_Server_Client {
 		}
 
 		if ( empty( $response->get_data()->redirect ) ) {
-			return new WP_Error( 'solid-central.auth.start.invalid_response', __( 'Invalid response from Solid Central.', 'it-l10n-ithemes-sync' ) );
+			return new WP_Error( 'solid-central.auth.start.invalid_response', __( 'Invalid response from Kadence Central.', 'it-l10n-ithemes-sync' ) );
 		}
 
 		return $response->get_data()->redirect;
@@ -148,7 +148,7 @@ class Central_Server_Client {
 		if ( ! is_array( $response_body ) ) {
 			return new WP_Error(
 				'solid-central.server-unknown-response',
-				__( 'An unrecognized server response format was received from the Solid Central server.', 'it-l10n-ithemes-sync' )
+				__( 'An unrecognized server response format was received from the Kadence Central server.', 'it-l10n-ithemes-sync' )
 			);
 		}
 

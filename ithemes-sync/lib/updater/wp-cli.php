@@ -92,6 +92,57 @@ final class Ithemes_Updater_WP_CLI_Ithemes_Licensing extends WP_CLI_Command {
 			$packages[] = $package;
 		}
 
+		// Inject/update entries for Harbor-managed products.
+		require_once( $GLOBALS['ithemes_updater_path'] . '/harbor.php' );
+		require_once( $GLOBALS['ithemes_updater_path'] . '/packages.php' );
+
+		if ( Ithemes_Updater_Harbor::is_available() ) {
+			$all_slugs   = array_unique( array_values( Ithemes_Updater_Packages::get_all() ) );
+			$unified_key = Ithemes_Updater_Harbor::get_unified_key();
+
+			// Build an index of existing packages by name for quick lookup.
+			$existing_index = array();
+			foreach ( $packages as $idx => $pkg ) {
+				$existing_index[ $pkg['name'] ] = $idx;
+			}
+
+			foreach ( $all_slugs as $slug ) {
+				if ( ! Ithemes_Updater_Harbor::is_product_managed( $slug ) ) {
+					continue;
+				}
+
+				// Unified products are treated as 'active' for --status filtering.
+				if ( 'all' !== $assoc_args['status'] && 'active' !== $assoc_args['status'] ) {
+					continue;
+				}
+
+				if ( ! is_null( $product ) && $slug !== $product ) {
+					continue;
+				}
+
+				if ( isset( $existing_index[ $slug ] ) ) {
+					// Update existing entry.
+					$packages[ $existing_index[ $slug ] ]['status'] = 'active (unified)';
+
+					if ( $assoc_args['verbose'] && $unified_key ) {
+						$packages[ $existing_index[ $slug ] ]['key'] = $unified_key;
+					}
+				} else {
+					// Add a new entry.
+					$package = array(
+						'name'   => $slug,
+						'status' => 'active (unified)',
+					);
+
+					if ( $assoc_args['verbose'] && $unified_key ) {
+						$package['key'] = $unified_key;
+					}
+
+					$packages[] = $package;
+				}
+			}
+		}
+
 		if ( ! empty( $packages ) ) {
 			if ( $assoc_args['verbose'] ) {
 				$columns = array(

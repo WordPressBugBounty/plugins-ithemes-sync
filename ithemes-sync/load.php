@@ -113,9 +113,9 @@ function ithemes_sync_handle_deactivation_hook() {
 register_deactivation_hook( __FILE__, 'ithemes_sync_handle_deactivation_hook' );
 
 /**
- * The SolidWP Updater register action callback.
+ * The Kadence Updater register action callback.
  *
- * @param mixed $updater An instance of the SolidWP Updater.
+ * @param mixed $updater An instance of the Kadence Updater.
  *
  * @return void
  */
@@ -127,12 +127,12 @@ add_action( 'ithemes_updater_register', 'ithemes_sync_updater_register' );
 require $GLOBALS['ithemes_sync_path'] . '/lib/updater/load.php';
 
 /**
- * Trust the Central Server IP addresses in Solid Security to allow
+ * Trust the Central Server IP addresses in Kadence Security to allow
  * Central to perform requests to the customer's site
  *
  * @param array<int,string> $trusted_ips The IPs to filter.
  *
- * @return array<int,string> The filtered Solid Security trusted IPs.
+ * @return array<int,string> The filtered Kadence Security trusted IPs.
  */
 function solid_central_solid_security_trusted_ips( array $trusted_ips ): array {
 	$trusted_ips[] = '207.246.254.118';
@@ -144,7 +144,7 @@ function solid_central_solid_security_trusted_ips( array $trusted_ips ): array {
 add_filter( 'solid_security_trusted_ips', 'solid_central_solid_security_trusted_ips' );
 
 /**
- * Solid Central login `init` action callback.
+ * Kadence Central login `init` action callback.
  *
  * @return false|void
  */

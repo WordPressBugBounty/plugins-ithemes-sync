@@ -134,7 +134,7 @@ class Ithemes_Sync_Admin {
 
 		?>
 	<div class="updated" id="ithemes-sync-notice">
-		<?php printf( __( 'Solid Central is active. <a class="ithemes-sync-notice-button" href="%s">Manage Central</a> <a class="ithemes-sync-notice-dismiss" href="#">×</a>', 'it-l10n-ithemes-sync' ), $url ); ?>
+		<?php printf( __( 'Kadence Central is active. <a class="ithemes-sync-notice-button" href="%s">Manage Central</a> <a class="ithemes-sync-notice-dismiss" href="#">×</a>', 'it-l10n-ithemes-sync' ), $url ); ?>
 	</div>
 		<?php
 	}
@@ -148,7 +148,7 @@ class Ithemes_Sync_Admin {
 
 		?>
 	<div class="updated" id="ithemes-sync-notice">
-		<?php printf( __( 'Solid Central is almost ready. <a class="ithemes-sync-notice-button" href="%s">Set Up Central</a> <a class="ithemes-sync-notice-hide" href="#">×</a>', 'it-l10n-ithemes-sync' ), $url ); ?>
+		<?php printf( __( 'Kadence Central is almost ready. <a class="ithemes-sync-notice-button" href="%s">Set Up Central</a> <a class="ithemes-sync-notice-hide" href="#">×</a>', 'it-l10n-ithemes-sync' ), $url ); ?>
 	</div>
 		<?php
 	}
@@ -162,7 +162,7 @@ class Ithemes_Sync_Admin {
 
 		?>
 	<div class="updated">
-		<p><?php printf( __( 'Solid Central will show for your user for the next %1$s. Click <a href="%2$s">here</a> to hide Solid Central again.', 'it-l10n-ithemes-sync' ), $time_diff, $url ); ?></p>
+		<p><?php printf( __( 'Kadence Central will show for your user for the next %1$s. Click <a href="%2$s">here</a> to hide Kadence Central again.', 'it-l10n-ithemes-sync' ), $time_diff, $url ); ?></p>
 	</div>
 		<?php
 	}
@@ -171,7 +171,7 @@ class Ithemes_Sync_Admin {
 
 		?>
 	<div class="updated">
-		<p><?php _e( 'Solid Central is now hidden from your user again.', 'it-l10n-ithemes-sync' ); ?></p>
+		<p><?php _e( 'Kadence Central is now hidden from your user again.', 'it-l10n-ithemes-sync' ); ?></p>
 	</div>
 		<?php
 	}
@@ -186,13 +186,13 @@ class Ithemes_Sync_Admin {
 	}
 
 	public function add_admin_pages() {
-		$this->page_ref = add_options_page( __( 'Solid Central', 'it-l10n-ithemes-sync' ), __( 'Solid Central', 'it-l10n-ithemes-sync' ), 'manage_options', $this->page_name, [ $this, 'settings_index' ] );
+		$this->page_ref = add_options_page( __( 'Kadence Central', 'it-l10n-ithemes-sync' ), __( 'Kadence Central', 'it-l10n-ithemes-sync' ), 'manage_options', $this->page_name, [ $this, 'settings_index' ] );
 
 		add_action( "load-{$this->page_ref}", [ $this, 'load_settings_page' ] );
 	}
 
 	public function add_network_admin_pages() {
-		$this->page_ref = add_submenu_page( 'settings.php', __( 'Solid Central', 'it-l10n-ithemes-sync' ), __( 'Solid Central', 'it-l10n-ithemes-sync' ), 'manage_options', $this->page_name, [ $this, 'settings_index' ] );
+		$this->page_ref = add_submenu_page( 'settings.php', __( 'Kadence Central', 'it-l10n-ithemes-sync' ), __( 'Kadence Central', 'it-l10n-ithemes-sync' ), 'manage_options', $this->page_name, [ $this, 'settings_index' ] );
 
 		add_action( "load-{$this->page_ref}", [ $this, 'load_settings_page' ] );
 	}
@@ -224,7 +224,7 @@ class Ithemes_Sync_Admin {
 		}
 
 		$url                     = admin_url( 'options-general.php' ) . "?page={$this->page_name}";
-		$this->registration_link = sprintf( '<a href="%1$s" title="%2$s">%3$s</a>', $url, __( 'Manage iThemes product licenses to receive automatic upgrade support', 'it-l10n-ithemes-sync' ), __( 'License', 'it-l10n-ithemes-sync' ) );
+		$this->registration_link = sprintf( '<a href="%1$s" title="%2$s">%3$s</a>', $url, __( 'Manage Kadence product licenses to receive automatic upgrade support', 'it-l10n-ithemes-sync' ), __( 'License', 'it-l10n-ithemes-sync' ) );
 	}
 
 	public function filter_plugin_action_links( $actions, $plugin_file, $plugin_data, $context ) {
@@ -269,9 +269,9 @@ class Ithemes_Sync_Admin {
 		}
 
 		$content  = '<div class="wp-suggested-text"><h2>' . __( 'Where we send your data', 'it-l10n-ithemes-sync' ) . '</h2>';
-		$content .= sprintf( __( '%1$s%2$sSuggested text:%3$s This web site uses a third party service to manage administrative tasks. If you leave a comment, submit personal information via a contact form, or otherwise exchange personal details with us, it is possible that we may use this service to manage that data. Please visit the %4$sSolidWP Privacy Policy%5$s for more information regarding the way they handle their data.%6$s%7$s', 'it-l10n-ithemes-sync' ), '<p>', '<strong class="privacy-policy-tutorial">', '</strong>', '<a href="https://ithemes.com/privacy-policy/">', '</a>', '</p>', '</div>' );
+		$content .= sprintf( __( '%1$s%2$sSuggested text:%3$s This web site uses a third party service to manage administrative tasks. If you leave a comment, submit personal information via a contact form, or otherwise exchange personal details with us, it is possible that we may use this service to manage that data. Please visit the %4$sKadence Privacy Policy%5$s for more information regarding the way they handle their data.%6$s%7$s', 'it-l10n-ithemes-sync' ), '<p>', '<strong class="privacy-policy-tutorial">', '</strong>', '<a href="https://ithemes.com/privacy-policy/">', '</a>', '</p>', '</div>' );
 
-		wp_add_privacy_policy_content( 'Solid Central', wp_kses_post( wpautop( $content, false ) ) );
+		wp_add_privacy_policy_content( 'Kadence Central', wp_kses_post( wpautop( $content, false ) ) );
 	}
 
 	/**

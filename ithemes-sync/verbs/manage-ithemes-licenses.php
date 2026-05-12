@@ -13,7 +13,7 @@ Version History
 
 class Ithemes_Sync_Verb_Manage_Ithemes_Licenses extends Ithemes_Sync_Verb {
 	public static $name = 'manage-ithemes-licenses';
-	public static $description = 'Get, set, and delete license keys for iThemes products.';
+	public static $description = 'Get, set, and delete license keys for Kadence products.';
 	public static $status_element_name = 'ithemes-licenses';
 	public static $show_in_status_by_default = false;
 
@@ -26,7 +26,7 @@ class Ithemes_Sync_Verb_Manage_Ithemes_Licenses extends Ithemes_Sync_Verb {
 
 		if ( empty( $GLOBALS['ithemes_updater_path'] ) ) {
 			if ( defined( 'ITHEMES_UPDATER_DISABLE' ) && ITHEMES_UPDATER_DISABLE ) {
-				return new WP_Error( 'ithemes-updater-is-disabled', 'The iThemes updater library is disabled on this site due to the ITHEMES_UPDATER_DISABLE define being set to a truthy value. Licensing for this site cannot be managed.' );
+				return new WP_Error( 'ithemes-updater-is-disabled', 'The Kadence updater library is disabled on this site due to the ITHEMES_UPDATER_DISABLE define being set to a truthy value. Licensing for this site cannot be managed.' );
 			} else {
 				return new WP_Error( 'ithemes-updater-not-loaded', 'The $GLOBALS[\'ithemes_updater_path\'] variable is empty or not set. This indicates that the updater was not loaded although the cause for this is not known.' );
 			}

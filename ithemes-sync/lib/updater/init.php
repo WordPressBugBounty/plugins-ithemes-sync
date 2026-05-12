@@ -110,6 +110,14 @@ function ithemes_updater_site_has_patchstack( $cache = true, $comparison_url = '
 		require( $GLOBALS['ithemes_updater_path'] . '/packages.php' );
 	}
 
+	if ( ! class_exists( 'Ithemes_Updater_Harbor' ) ) {
+		require( $GLOBALS['ithemes_updater_path'] . '/harbor.php' );
+	}
+
+	if ( Ithemes_Updater_Harbor::is_product_managed( 'ithemes-security-pro' ) ) {
+		return true;
+	}
+
 	$key = Ithemes_Updater_Keys::get( 'ithemes-security-pro' );
 
 	if ( ! $key ) {
@@ -121,6 +129,11 @@ function ithemes_updater_site_has_patchstack( $cache = true, $comparison_url = '
 	}
 
 	$quota = Ithemes_Updater_API::get_patchstack_quota( $key, $cache );
+
+	if ( ! is_array( $quota ) || ! array_key_exists( 'sites', $quota ) ) {
+		return false;
+	}
+
 	$site_url = ithemes_updater_get_licensed_site_url();
 	$site_url = preg_replace( '|^https?://|', '', $site_url );
 	$site_url = str_replace( 'www.', '', $site_url );
@@ -149,3 +162,32 @@ function ithemes_updater_get_licensed_username( $package ) {
 
 	return $details['packages'][ $package ]['user'];
 }
+
+/**
+ * Report existing legacy keys to Harbor's unified notice system.
+ *
+ * Only runs in wp-admin — Harbor's settings page is the sole consumer.
+ * Only reports keys for products NOT managed by Harbor (to avoid circular reporting).
+ */
+function ithemes_updater_register_harbor_legacy_licenses() {
+	if ( ! is_admin() ) {
+		return;
+	}
+
+	if ( ! class_exists( 'Ithemes_Updater_Harbor' ) ) {
+		require( $GLOBALS['ithemes_updater_path'] . '/harbor.php' );
+	}
+
+	if ( ! Ithemes_Updater_Harbor::is_available() ) {
+		return;
+	}
+
+	add_filter( 'lw-harbor/legacy_licenses', function ( $licenses ) {
+		if ( ! class_exists( 'Ithemes_Updater_Harbor' ) ) {
+			require( $GLOBALS['ithemes_updater_path'] . '/harbor.php' );
+		}
+
+		return array_merge( $licenses, Ithemes_Updater_Harbor::get_legacy_licenses() );
+	} );
+}
+add_action( 'it_libraries_loaded', 'ithemes_updater_register_harbor_legacy_licenses' );

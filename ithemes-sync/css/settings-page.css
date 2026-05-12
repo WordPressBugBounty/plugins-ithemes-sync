@@ -1,18 +1,18 @@
 .ithemes-sync-wrapper {
   --white: #fff;
 
-  --grape-purple-120: #49108a;
-  --grape-purple-110: #53129e;
-  --grape-purple-100: #6817c5;
+  --blue-800: #0a2d7d;
+  --blue-700: #0e38a3;
+  --blue-600: #1145c9;
 
   --gray-90: #232323;
   --gray-80: #333333;
   --gray-20: #cecece;
   --gray-0: #f6f7f7;
 
-  --red-50: #d63638;
-  --sunglow-yellow-100: #ffc518;
-  --orange-100: #ff8528;
+  --red-50: #d12502;
+  --sunglow-yellow-100: #e86230;
+  --orange-100: #e39219;
   --green-30: #00ba37;
   --blueberry-blue: #3858e9;
 
@@ -33,10 +33,10 @@
 
   --surface-primary: #fff;
 
-  --wp-admin-theme-color: var(--grape-purple-100);
-  --wp-admin-theme-color-darker-10: var(--grape-purple-110);
-  --wp-admin-theme-color-darker-20: var(--grape-purple-120);
-  --wp-components-color-accent: var(--grape-purple-100);
+  --wp-admin-theme-color: var(--blue-600);
+  --wp-admin-theme-color-darker-10: var(--blue-700);
+  --wp-admin-theme-color-darker-20: var(--blue-800);
+  --wp-components-color-accent: var(--blue-600);
 
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;

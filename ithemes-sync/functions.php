@@ -1070,7 +1070,7 @@ class Ithemes_Sync_Functions {
 		$app_password = WP_Application_Passwords::create_new_application_password(
 			$user->ID,
 			[
-				'name'   => 'SolidWP ' . date_i18n( 'M j, Y g:i:s A' ),
+				'name'   => 'Kadence ' . date_i18n( 'M j, Y g:i:s A' ),
 				'app_id' => SOLID_CENTRAL_APP_ID,
 			]
 		);

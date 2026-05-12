@@ -1,10 +1,10 @@
 === Solid Central – Site Management, Backups, Security, and Reporting ===
-Contributors: ithemes, solidwp, stellarwp, timothyblynjacobs, bitmachina, oakesjosh
+Contributors: ithemes, solidwp, nexcess, timothyblynjacobs, bitmachina, oakesjosh
 Tags: manage multiple websites, backup, security, manage updates, report dashboard
 Requires at least: 6.4
 Requires PHP: 7.0
-Tested up to: 6.8
-Stable tag: 3.2.9
+Tested up to: 6.9
+Stable tag: 4.0.0
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/quick-guide-gplv3.html
 
@@ -128,6 +128,9 @@ Solid Central includes an automatic “Add Site” prompt when you first login t
 Got more questions? [Contact us!](https://solidwp.com/contact.)
 
 == Changelog ==
+
+= 4.0.0 =
+* Tweak: Updated branding from SolidWP to Kadence.
 
 = 3.2.9 =
 * Retired: Retired post/page duplication functionality.

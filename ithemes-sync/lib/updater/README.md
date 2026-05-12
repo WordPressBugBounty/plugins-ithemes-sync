@@ -46,6 +46,26 @@ iThemes Package: repository-name
 
 5. Verify and ship
 
-As with any change of this nature, verify that everything works. Ensure that with the product active, that there aren’t any errors. Since this system works in a manner where only one copy of the library code will run (the most current version), a good check to do is to deactivate all other products that include this code to verify that everything works when using the library directly from the product that is being updated.
+As with any change of this nature, verify that everything works. Ensure that with the product active, that there aren't any errors. Since this system works in a manner where only one copy of the library code will run (the most current version), a good check to do is to deactivate all other products that include this code to verify that everything works when using the library directly from the product that is being updated.
 
 Once everything has been confirmed as working, release a new version as normal (assuming that the product is ready to be released).
+
+# Harbor Integration
+
+The updater integrates with [LiquidWeb Harbor](https://github.com/stellarwp/harbor) to support unified licensing. When Harbor is managing a product's license, the updater automatically defers to it — injecting the unified key at read time, excluding the product from legacy API calls, and showing it in a separate "Unified License" card on the settings page.
+
+All interaction with Harbor happens through `function_exists()` guards in `Ithemes_Updater_Harbor` (`harbor.php`). When Harbor is not installed, the updater behaves identically to before.
+
+**How it works:**
+
+- **Gating check:** `lw_harbor_is_product_license_active($slug)` determines if Harbor manages a product. Results are cached per-request.
+- **Key injection:** `Keys::get()` injects the unified key for Harbor-managed products at read time. `Keys::get('__all__')` returns raw DB contents, so the unified key never persists to the database.
+- **Write protection:** `Keys::set()` skips Harbor-managed products to prevent overwriting.
+- **API exclusion:** Harbor-managed products are filtered out of requests to `api.ithemes.com`.
+- **Legacy license reporting:** In wp-admin, the updater reports non-Harbor keys to Harbor via the `lw-harbor/legacy_licenses` filter for consolidated admin notices.
+- **Admin UI:** Harbor-managed products appear in a read-only "Unified License (LiquidWeb)" card, separate from the legacy licensing forms.
+- **WP-CLI:** `wp ithemes-licensing show` includes Harbor-managed products with status `active (unified)`.
+
+**Files involved:** `harbor.php`, `keys.php`, `api.php`, `updates.php`, `init.php`, `settings-page.php`, `wp-cli.php`
+
+For Harbor's own integration guide, see: https://github.com/stellarwp/harbor/blob/main/docs/harbor-integration-guide.md

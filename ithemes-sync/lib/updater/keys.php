@@ -32,9 +32,13 @@ class Ithemes_Updater_Keys {
 			$all_keys = array();
 		}
 
+		// '__all__' returns raw DB contents so set() never sees unified keys.
 		if ( '__all__' == $packages ) {
 			return $all_keys;
 		}
+
+		// Track whether a single string was passed before we potentially reassign $packages.
+		$is_string = is_string( $packages );
 
 		if ( empty( $packages ) ) {
 			require_once( $GLOBALS['ithemes_updater_path'] . '/packages.php' );
@@ -50,9 +54,23 @@ class Ithemes_Updater_Keys {
 			}
 		}
 
+		// Inject unified key for Harbor-managed products.
+		require_once( $GLOBALS['ithemes_updater_path'] . '/harbor.php' );
 
-		if ( ! is_array( $packages ) ) {
-			return $keys[$packages];
+		if ( Ithemes_Updater_Harbor::is_available() ) {
+			$unified_key = Ithemes_Updater_Harbor::get_unified_key();
+
+			if ( null !== $unified_key ) {
+				foreach ( (array) $packages as $package ) {
+					if ( Ithemes_Updater_Harbor::is_product_managed( $package ) ) {
+						$keys[ $package ] = $unified_key;
+					}
+				}
+			}
+		}
+
+		if ( $is_string ) {
+			return isset( $keys[ $packages ] ) ? $keys[ $packages ] : '';
 		}
 
 		return $keys;
@@ -61,12 +79,21 @@ class Ithemes_Updater_Keys {
 	public static function set( $new_keys, $key = false ) {
 		$keys = self::get( '__all__' );
 
+		require_once( $GLOBALS['ithemes_updater_path'] . '/harbor.php' );
+
 		if ( false === $key ) {
 			foreach ( $new_keys as $package => $key ) {
+				// Skip Harbor-managed products — Harbor owns the key.
+				if ( Ithemes_Updater_Harbor::is_product_managed( $package ) ) {
+					continue;
+				}
 				$keys[$package] = $key;
 			}
 		} else {
-			$keys[$new_keys] = $key;
+			// Skip Harbor-managed products — Harbor owns the key.
+			if ( ! Ithemes_Updater_Harbor::is_product_managed( $new_keys ) ) {
+				$keys[$new_keys] = $key;
+			}
 		}
 
 		if ( ! isset( $GLOBALS['ithemes-updater-keys-db-failure'] ) || false === $GLOBALS['ithemes-updater-keys-db-failure'] ) {

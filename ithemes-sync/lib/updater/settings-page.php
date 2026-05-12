@@ -32,6 +32,7 @@ class Ithemes_Updater_Settings_Page {
 		require_once( $GLOBALS['ithemes_updater_path'] . '/functions.php' );
 		require_once( $GLOBALS['ithemes_updater_path'] . '/api.php' );
 		require_once( $GLOBALS['ithemes_updater_path'] . '/keys.php' );
+		require_once( $GLOBALS['ithemes_updater_path'] . '/harbor.php' );
 
 
 		$this->path_url = Ithemes_Updater_Functions::get_url( $GLOBALS['ithemes_updater_path'] );
@@ -389,10 +390,26 @@ class Ithemes_Updater_Settings_Page {
 			}
 		}
 
+		// Extract Harbor-managed products into a separate group.
+		$harbor_managed = array();
+
+		foreach ( array( &$licensed, &$unlicensed, &$unrecognized ) as &$group ) {
+			foreach ( $group as $name => $data ) {
+				if ( Ithemes_Updater_Harbor::is_product_managed( $data['package'] ) ) {
+					$harbor_managed[ $name ] = $data;
+					unset( $group[ $name ] );
+				}
+			}
+		}
+		unset( $group );
+
+		$has_legacy_licenses = count( $licensed ) > 0 || count( $unlicensed ) > 0;
+
 		$security_package = wp_list_filter( $packages, array( 'package' => 'ithemes-security-pro' ) );
 		$security_package = reset( $security_package );
 
-		if ( $security_package && ! empty( $security_package['key'] ) ) {
+		// If a security package is managed by Harbor, the patchstack is always available, don't need to check quota and show UI
+		if ( $security_package && ! empty( $security_package['key'] ) && ! Ithemes_Updater_Harbor::is_product_managed( $security_package['package'] ) ) {
 			$patchstack_quota = Ithemes_Updater_API::get_patchstack_quota( $security_package['key'] );
 
 			if ( ! is_wp_error( $patchstack_quota ) ) {
@@ -404,18 +421,24 @@ class Ithemes_Updater_Settings_Page {
 			$this->messages[] = __( 'Successfully updated the Licensed URL.', 'it-l10n-ithemes-sync' );
 		}
 ?>
-	<div class="solidwp-licensing-page-header">
-		<img src="<?php echo esc_attr( $this->path_url . '/images/logo-solidwp.svg' ); ?>" />
-	</div>
 	<div class="solidwp-licensing">
 		<div class="solidwp-licensing-wrap">
 			<div class="solidwp-licensing-wrap-header">
-				<h2><?php _e( 'SolidWP Licensing', 'it-l10n-ithemes-sync' ); ?></h2>
+				<h2><?php _e( 'Kadence/SolidWP Licensing', 'it-l10n-ithemes-sync' ); ?> <span class="solidwp-licensing-legacy-badge"><?php _e( '(Legacy)', 'it-l10n-ithemes-sync' ); ?></span></h2>
+
+				<?php if ( function_exists( 'lw_harbor_get_license_page_url' ) ) : ?>
+				<div class="updated solidwp-licensing-transition-notice">
+					<p><strong>&#9432; <?php _e( 'SolidWP products are now part of Kadence', 'it-l10n-ithemes-sync' ); ?></strong></p>
+					<p><?php printf( __( 'This page manages legacy licenses from your previous SolidWP or iThemes account. If you purchased a new plan through Liquid Web, your products are managed through the <a href="%s">Liquid Web Software Manager</a> and do not require action here.', 'it-l10n-ithemes-sync' ), esc_url( lw_harbor_get_license_page_url() ) ); ?></p>
+					<p><?php printf( __( '<strong>Have questions about your legacy license?</strong> <a href="%1$s">Contact Support &rarr;</a> | <strong>Want to upgrade to a Kadence plan?</strong> <a href="%2$s">Learn how to upgrade &rarr;</a>', 'it-l10n-ithemes-sync' ), 'https://liquidweb.com/support/', 'https://kadencewp.com/' ); ?></p>
+				</div>
+				<?php endif; ?>
 
 				<?php $this->show_notices( $is_staging ); ?>
 			</div>
 
 		<?php
+			$this->list_harbor_managed_products( $harbor_managed );
 			$this->list_licensed_products( $licensed, $post_data, $action );
 			if ( $has_patchstack ) {
 				if ( ( $security_package['total'] > 0 || $security_package['total'] == -1 ) && $patchstack_quota['total'] > 0 ) {
@@ -424,8 +447,67 @@ class Ithemes_Updater_Settings_Page {
 			}
 			$this->list_unlicensed_products( $unlicensed, $post_data, $action );
 			$this->list_unrecognized_products( $unrecognized );
-			$this->show_settings();
+
+			if ( $has_legacy_licenses ) {
+				$this->show_settings();
+			}
 		?>
+	</div>
+<?php
+
+	}
+
+	private function list_harbor_managed_products( $products ) {
+		if ( empty( $products ) ) {
+			return;
+		}
+
+		uksort( $products, 'strnatcasecmp' );
+
+		$unified_key        = Ithemes_Updater_Harbor::get_unified_key();
+		$harbor_license_url = Ithemes_Updater_Harbor::get_license_page_url();
+
+?>
+	<div class="ithemes-updater-products" id="ithemes-updater-harbor-managed">
+		<div class="solidwp-table-header">
+			<div>
+				<h3 class="subtitle"><?php _e( 'Liquid Web Unified License', 'it-l10n-ithemes-sync' ); ?></h3>
+				<?php if ( $unified_key ) : ?>
+					<p><?php printf( __( 'Key: %s', 'it-l10n-ithemes-sync' ), '<code>' . esc_html( $unified_key ) . '</code>' ); ?></p>
+				<?php endif; ?>
+				<?php if ( $harbor_license_url ) : ?>
+					<p><?php printf( __( 'These products are licensed and updated through the <a href="%s">Liquid Web Software Manager</a>.', 'it-l10n-ithemes-sync' ), esc_url( $harbor_license_url ) ); ?></p>
+				<?php else : ?>
+					<p><?php _e( 'These products are licensed and updated through the Liquid Web Software Manager.', 'it-l10n-ithemes-sync' ); ?></p>
+				<?php endif; ?>
+			</div>
+		</div>
+
+		<table class="ithemes-updater-listing widefat">
+			<thead>
+				<tr>
+					<th scope="col"><?php _e( 'Product', 'it-l10n-ithemes-sync' ); ?></th>
+					<th scope="col"><?php _e( 'Product Status', 'it-l10n-ithemes-sync' ); ?></th>
+					<th scope="col" class="mobile-hidden"><?php _e( 'Installed Version', 'it-l10n-ithemes-sync' ); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php $count = 0; ?>
+				<?php foreach ( $products as $name => $data ) : ?>
+					<?php
+						$class = 'active';
+						if ( ++$count % 2 ) {
+							$class .= ' alt';
+						}
+					?>
+					<tr class="<?php echo esc_attr( $class ); ?>">
+						<td><?php echo wp_kses( $this->format_product_name( $name ), [ 'strong' => [] ] ); ?></td>
+						<td><?php _e( 'Active (Unified)', 'it-l10n-ithemes-sync' ); ?></td>
+						<td class="mobile-hidden"><?php echo esc_html( isset( $data['installed'] ) ? $data['installed'] : '' ); ?></td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
 	</div>
 <?php
 
@@ -600,7 +682,7 @@ class Ithemes_Updater_Settings_Page {
 								</label>
 							</th>
 							<td>
-								<label for="<?php echo esc_attr( $check_id ); ?>"><?php echo esc_html( $name ); ?></label>
+								<label for="<?php echo esc_attr( $check_id ); ?>"><?php echo wp_kses( $this->format_product_name( $name ), [ 'strong' => [] ] ); ?></label>
 							</td>
 							<td class="mobile-hidden"><?php echo esc_html( $data['user'] ); ?></td>
 							<td><?php echo $status; ?></td>
@@ -612,10 +694,11 @@ class Ithemes_Updater_Settings_Page {
 				<tfoot>
 					<tr>
 						<td colspan="6">
-							<input type="text" name="it-updater-username" placeholder="SolidWP Username" value="<?php echo esc_attr( $post_data['username'] ); ?>" autocomplete="off" />
-							<input type="password" name="it-updater-password" placeholder="Password" value="<?php echo esc_attr( $post_data['password'] ); ?>" />
+							<input type="text" name="it-updater-username" placeholder="<?php echo esc_attr__( 'SolidWP Username (Legacy)', 'it-l10n-ithemes-sync' ); ?>" value="<?php echo esc_attr( $post_data['username'] ); ?>" autocomplete="off" />
+							<input type="password" name="it-updater-password" placeholder="<?php echo esc_attr__( 'Password (Legacy)', 'it-l10n-ithemes-sync' ); ?>" value="<?php echo esc_attr( $post_data['password'] ); ?>" />
 							<input class="button-primary" type="submit" name="submit" value="<?php _e( 'Remove Licenses', 'it-l10n-ithemes-sync' ); ?>" />
 							<input type="hidden" name="action" value="unlicense_packages" />
+							<p class="description"><?php _e( 'Use the username from your previous iThemes or SolidWP account. New plans purchased from Liquid Web are managed separately.', 'it-l10n-ithemes-sync' ); ?></p>
 						</td>
 					</tr>
 				</tfoot>
@@ -692,10 +775,11 @@ class Ithemes_Updater_Settings_Page {
 				<tfoot>
 					<tr>
 						<td colspan="2">
-							<input type="text" name="it-updater-username" placeholder="SolidWP Username" value="<?php echo esc_attr( $post_data['username'] ); ?>" autocomplete="off" />
-							<input type="password" name="it-updater-password" placeholder="Password" value="<?php echo esc_attr( $post_data['password'] ); ?>" />
+							<input type="text" name="it-updater-username" placeholder="<?php echo esc_attr__( 'SolidWP Username (Legacy)', 'it-l10n-ithemes-sync' ); ?>" value="<?php echo esc_attr( $post_data['username'] ); ?>" autocomplete="off" />
+							<input type="password" name="it-updater-password" placeholder="<?php echo esc_attr__( 'Password (Legacy)', 'it-l10n-ithemes-sync' ); ?>" value="<?php echo esc_attr( $post_data['password'] ); ?>" />
 							<input class="button-primary" type="submit" name="submit" value="<?php _e( 'Remove Patchstack License', 'it-l10n-ithemes-sync' ); ?>" />
 							<input type="hidden" name="action" value="unlicense_patchstack_sites" />
+							<p class="description"><?php _e( 'Use the username from your previous iThemes or SolidWP account. New plans purchased from Liquid Web are managed separately.', 'it-l10n-ithemes-sync' ); ?></p>
 						</td>
 					</tr>
 				</tfoot>
@@ -723,10 +807,11 @@ class Ithemes_Updater_Settings_Page {
 					<tr>
 						<td>
 							<?php wp_nonce_field( 'license_patchstack_site', 'ithemes_updater_nonce' ); ?>
-							<input type="text" name="it-updater-username" placeholder="SolidWP Username" value="<?php echo esc_attr( $post_data['username'] ); ?>" autocomplete="off" />
-							<input type="password" name="it-updater-password" placeholder="Password" value="<?php echo esc_attr( $post_data['password'] ); ?>" />
+							<input type="text" name="it-updater-username" placeholder="<?php echo esc_attr__( 'SolidWP Username (Legacy)', 'it-l10n-ithemes-sync' ); ?>" value="<?php echo esc_attr( $post_data['username'] ); ?>" autocomplete="off" />
+							<input type="password" name="it-updater-password" placeholder="<?php echo esc_attr__( 'Password (Legacy)', 'it-l10n-ithemes-sync' ); ?>" value="<?php echo esc_attr( $post_data['password'] ); ?>" />
 							<input class="button-secondary" type="submit" name="submit" value="<?php _e( 'License This Site', 'it-l10n-ithemes-sync' ); ?>" />
 							<input type="hidden" name="action" value="license_patchstack_site" />
+							<p class="description"><?php _e( 'Use the username from your previous iThemes or SolidWP account. New plans purchased from Liquid Web are managed separately.', 'it-l10n-ithemes-sync' ); ?></p>
 						</td>
 					</tr>
 				</tfoot>
@@ -810,7 +895,7 @@ class Ithemes_Updater_Settings_Page {
 								</label>
 							</th>
 							<td>
-								<label for="<?php echo esc_attr( $check_id ); ?>"><?php echo esc_html( $name ); ?></label>
+								<label for="<?php echo esc_attr( $check_id ); ?>"><?php echo wp_kses( $this->format_product_name( $name ), [ 'strong' => [] ] ); ?></label>
 							</td>
 						</tr>
 					<?php endforeach; ?>
@@ -818,10 +903,11 @@ class Ithemes_Updater_Settings_Page {
 				<tfoot>
 					<tr>
 						<td colspan="2">
-							<input type="text" name="it-updater-username" placeholder="SolidWP Username" value="<?php echo esc_attr( $post_data['username'] ); ?>" autocomplete="off" />
-							<input type="password" name="it-updater-password" placeholder="Password" value="<?php echo esc_attr( $post_data['password'] ); ?>" />
+							<input type="text" name="it-updater-username" placeholder="<?php echo esc_attr__( 'SolidWP Username (Legacy)', 'it-l10n-ithemes-sync' ); ?>" value="<?php echo esc_attr( $post_data['username'] ); ?>" autocomplete="off" />
+							<input type="password" name="it-updater-password" placeholder="<?php echo esc_attr__( 'Password (Legacy)', 'it-l10n-ithemes-sync' ); ?>" value="<?php echo esc_attr( $post_data['password'] ); ?>" />
 							<input class="button-primary" type="submit" name="submit" value="<?php _e( 'License Products', 'it-l10n-ithemes-sync' ); ?>" />
 							<input type="hidden" name="action" value="license_packages" />
+							<p class="description"><?php _e( 'Use the username from your previous iThemes or SolidWP account. New plans purchased from Liquid Web are managed separately.', 'it-l10n-ithemes-sync' ); ?></p>
 						</td>
 					</tr>
 				</tfoot>
@@ -917,13 +1003,10 @@ class Ithemes_Updater_Settings_Page {
 
 ?>
 	<div class="wrap" id="ithemes-updater-site-url-confirmation">
-		<div class="solidwp-licensing-page-header">
-			<img src="<?php echo esc_attr( $this->path_url . '/images/logo-solidwp.svg' ); ?>" />
-		</div>
 		<div class="solidwp-licensing">
 			<div class="solidwp-licensing-wrap">
 				<div class="solidwp-licensing-wrap-header">
-					<h2><?php _e( 'Licensing', 'it-l10n-ithemes-sync' ); ?></h2>
+					<h2><?php _e( 'Kadence/SolidWP Licensing', 'it-l10n-ithemes-sync' ); ?> <span class="solidwp-licensing-legacy-badge"><?php _e( '(Legacy)', 'it-l10n-ithemes-sync' ); ?></span></h2>
 					<p><?php _e( "Please confirm this site's licensed URL.", 'it-l10n-ithemes-sync' ); ?></p>
 				</div>
 
@@ -1031,11 +1114,8 @@ class Ithemes_Updater_Settings_Page {
 
 ?>
 	<div class="wrap" id="ithemes-updater-relicense">
-		<div class="solidwp-licensing-page-header">
-			<img src="<?php echo esc_attr( $this->path_url . '/images/logo-solidwp.svg' ); ?>" />
-		</div>
 		<div class="solidwp-licensing-wrap">
-			<h2><?php _e( 'Licensing', 'it-l10n-ithemes-sync' ); ?></h2>
+			<h2><?php _e( 'Kadence/SolidWP Licensing', 'it-l10n-ithemes-sync' ); ?> <span class="solidwp-licensing-legacy-badge"><?php _e( '(Legacy)', 'it-l10n-ithemes-sync' ); ?></span></h2>
 
 			<p><?php printf( __( 'The licenses on this site are for <code>%s</code>.', 'it-l10n-ithemes-sync' ), esc_html( $site_url_from_server ) ); ?></p>
 
@@ -1154,6 +1234,14 @@ class Ithemes_Updater_Settings_Page {
 		$this->list_packages();
 	}
 
+
+	private function format_product_name( $name ) {
+		$pos = strpos( $name, '(formerly' );
+		if ( $pos !== false ) {
+			return '<strong>' . esc_html( substr( $name, 0, $pos ) ) . '</strong>' . esc_html( substr( $name, $pos ) );
+		}
+		return esc_html( $name );
+	}
 
 	private function show_notices( $is_staging = false ) {
 		if ( $is_staging) {

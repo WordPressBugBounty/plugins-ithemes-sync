@@ -101,3 +101,10 @@
 	Enhancement: Update SolidWP logo.
 1.9.2 - 2025-07-21 - Lisa Canini
 	Tweak: Remove banner when running sunset products.
+1.9.3 - 2026-01-26 - Justin Frydman, Volodymyr Shelmuk
+	Tweak: Always provide changelog for the current major version.
+	Fix: Add missing `$username` class property to iThemes_Credentials class.
+2.0.0 - 2026-04-14 - John Hooks, Volodymyr Shelmuk
+	Enhancement: Add Liquid Web licensing support.
+2.0.1 - 2026-04-20 - Volodymyr Shelmuk
+	Fix: Clarify legacy license notice text.

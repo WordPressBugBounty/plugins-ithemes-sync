@@ -293,3 +293,5 @@
 	New: Add filter to return Central IPs.
 3.2.9 - 2026-02-18 - John Hooks
 	Retired: Retired post/page duplication functionality.
+4.0.0 - TBD - Nexcess
+	Tweak: Updated branding from SolidWP to Kadence.

@@ -1,14 +1,14 @@
 #ithemes-sync-notice {
-  --grape-purple-120: #49108a;
-  --grape-purple-110: #53129e;
-  --grape-purple-100: #6817c5;
+  --blue-800: #0a2d7d;
+  --blue-700: #0e38a3;
+  --blue-600: #1145c9;
 
   --surface-primary: #fff;
 
-  --wp-admin-theme-color: var(--grape-purple-100);
-  --wp-admin-theme-color-darker-10: var(--grape-purple-110);
-  --wp-admin-theme-color-darker-20: var(--grape-purple-120);
-  --wp-components-color-accent: var(--grape-purple-100);
+  --wp-admin-theme-color: var(--blue-600);
+  --wp-admin-theme-color-darker-10: var(--blue-700);
+  --wp-admin-theme-color-darker-20: var(--blue-800);
+  --wp-components-color-accent: var(--blue-600);
 
   color: var(--text-normal);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
@@ -16,13 +16,10 @@
   font-size: 14px;
   line-height: 1.6;
   margin: 1em 0;
-  padding: 0 0.75em 1em 5em;
+  padding: 0 0.75em 1em 0.75em;
   position: relative;
   border-left: 4px solid var(--wp-admin-theme-color);
-  background: var(--surface-primary) url("../images/central-logo-small.svg")
-    no-repeat;
-  background-size: 2.5rem;
-  background-position: 0.85rem;
+  background: var(--surface-primary);
 }
 
 #ithemes-sync-notice a {

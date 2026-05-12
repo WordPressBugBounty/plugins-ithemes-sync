@@ -216,7 +216,7 @@ class Auth extends \WP_REST_Controller {
 	/**
 	 * Start the authentication process.
 	 *
-	 * This will create an application password for the current user and send the user to Solid Central.
+	 * This will create an application password for the current user and send the user to Kadence Central.
 	 * The Response will contain a redirect URL and an expires_at timestamp.
 	 *
 	 * @param WP_REST_Request $request The request object.
@@ -290,7 +290,7 @@ class Auth extends \WP_REST_Controller {
 		} elseif ( $code >= 500 && $code < 600 ) {
 			return new WP_Error(
 				'solid-central.auth.start.server_error',
-				__( 'There was a temporary issue with the Solid Central server. Please try again later.', 'it-l10n-ithemes-sync' ),
+				__( 'There was a temporary issue with the Kadence Central server. Please try again later.', 'it-l10n-ithemes-sync' ),
 				[
 					'status' => $code,
 				]
@@ -298,7 +298,7 @@ class Auth extends \WP_REST_Controller {
 		}
 
 		if ( ! isset( $response_body->redirect ) || ! isset( $response_body->expires_at ) ) {
-			return new WP_Error( 'solid-central.auth.start.invalid_response', __( 'Invalid response from Solid Central', 'it-l10n-ithemes-sync' ) );
+			return new WP_Error( 'solid-central.auth.start.invalid_response', __( 'Invalid response from Kadence Central', 'it-l10n-ithemes-sync' ) );
 		}
 
 		return new WP_REST_Response( $response_body, 200 );
@@ -315,7 +315,7 @@ class Auth extends \WP_REST_Controller {
 	 */
 	public function auth_verify( WP_REST_Request $request ) {
 		if ( ! isset( $request['state'] ) ) {
-			return new WP_Error( 'solid-central.auth.verify.state_missing', __( 'State property missing from Solid Central.', 'it-l10n-ithemes-sync' ) );
+			return new WP_Error( 'solid-central.auth.verify.state_missing', __( 'State property missing from Kadence Central.', 'it-l10n-ithemes-sync' ) );
 		}
 
 		$user         = wp_get_current_user();
@@ -327,7 +327,7 @@ class Auth extends \WP_REST_Controller {
 		}
 
 		if ( ! hash_equals( $stored_state, wp_hash( $request['state'] ) ) ) {
-			return new WP_Error( 'solid-central.auth.verify.state_invalid', __( 'Invalid state property from Solid Central.', 'it-l10n-ithemes-sync' ) );
+			return new WP_Error( 'solid-central.auth.verify.state_invalid', __( 'Invalid state property from Kadence Central.', 'it-l10n-ithemes-sync' ) );
 		}
 
 		delete_transient( $transient );
@@ -336,7 +336,7 @@ class Auth extends \WP_REST_Controller {
 	}
 
 	/**
-	 * Add a Central authentication for a SolidWP user.
+	 * Add a Central authentication for a Kadence user.
 	 *
 	 * @param WP_REST_Request $request The Request object.
 	 *

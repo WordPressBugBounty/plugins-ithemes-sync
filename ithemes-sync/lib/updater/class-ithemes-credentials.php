@@ -15,6 +15,7 @@
         
         protected $key_length       = 64;
                
+        protected $username;
         protected $password;
         
         //-----------------------------------------------------------------------------

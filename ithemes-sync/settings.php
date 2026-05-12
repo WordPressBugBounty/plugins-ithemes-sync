@@ -159,7 +159,7 @@ class Ithemes_Sync_Settings {
 	 * Add an authentication to the settings option.
 	 *
 	 * @param int          $central_site_id  The ID of the site to authenticate.
-	 * @param string       $solidwp_username The username of the SolidWP account.
+	 * @param string       $solidwp_username The username of the Kadence account.
 	 * @param string       $key              The private key for the authentication.
 	 * @param string|false $wp_user_login    The WordPress user login to associate with the authentication.
 	 *
@@ -189,7 +189,7 @@ class Ithemes_Sync_Settings {
 		if ( ! update_site_option( $this->option_name, $this->options ) ) {
 			return new WP_Error(
 				'solid-central.auth.add-authentication-failed',
-				__( 'Solid Central authorization failed, unable to save authentication details.', 'it-l10n-ithemes-sync' ),
+				__( 'Kadence Central authorization failed, unable to save authentication details.', 'it-l10n-ithemes-sync' ),
 				[
 					'status' => 500,
 				]
@@ -209,7 +209,7 @@ class Ithemes_Sync_Settings {
 
 		return new WP_Error(
 			'solid-central.auth.add-authentication-failed',
-			__( 'Solid Central authorization failed, encountered an unknown error.', 'it-l10n-ithemes-sync' ),
+			__( 'Kadence Central authorization failed, encountered an unknown error.', 'it-l10n-ithemes-sync' ),
 			[
 				'status' => 500,
 			]
@@ -217,10 +217,10 @@ class Ithemes_Sync_Settings {
 	}
 
 	/**
-	 * Remove a Solid Central user authentication.
+	 * Remove a Kadence Central user authentication.
 	 *
 	 * @param int    $user_id The WordPress user ID.
-	 * @param string $username The SolidWP username.
+	 * @param string $username The Kadence username.
 	 *
 	 * @return true|WP_Error
 	 */

@@ -1,13 +1,13 @@
 <?php
 /*
- * Plugin Name: Solid Central
- * Plugin URI: https://solidwp.com/central
+ * Plugin Name: Kadence Central
+ * Plugin URI: https://kadencewp.com
  * Description: Maximize and amplify your admin with remote, multi-site management. One centralized dashboard to save time.
- * Author: SolidWP
- * Version: 3.2.9
+ * Author: Kadence
+ * Version: 4.0.0
  * Requires at least: 6.4
  * Requires PHP: 7.0
- * Author URI: https://solidwp.com/
+ * Author URI: https://kadencewp.com
  * Domain Path: /lang/
  * iThemes Package: ithemes-sync
  */
@@ -30,7 +30,7 @@ if ( ! empty( $GLOBALS['ithemes_sync_path'] ) ) {
 					wp_kses(
 						/* translators: 1: Active plugin path, 2: This plugin path */
 						__(
-							'Only one Solid Central plugin can be active at a time. The plugin at <code>%1$s</code> is running while the plugin at <code>%2$s</code> was skipped in order to prevent errors. Please deactivate the plugin that you do not wish to use.',
+							'Only one Kadence Central plugin can be active at a time. The plugin at <code>%1$s</code> is running while the plugin at <code>%2$s</code> was skipped in order to prevent errors. Please deactivate the plugin that you do not wish to use.',
 							'it-l10n-ithemes-sync'
 						),
 						[

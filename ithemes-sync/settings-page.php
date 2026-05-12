@@ -91,9 +91,9 @@ class Ithemes_Sync_Settings_Page {
 			$message = '';
 
 			if ( 'http_request_failed' == $code ) {
-				$message = '<p>' . __( 'The Solid Central server was unable to be contacted. WordPress returned the following error when trying to contact the server:', 'it-l10n-ithemes-sync' ) . '</p>';
+				$message = '<p>' . __( 'The Kadence Central server was unable to be contacted. WordPress returned the following error when trying to contact the server:', 'it-l10n-ithemes-sync' ) . '</p>';
 			} elseif ( 'ithemes-sync-server-failed-request' == $code ) {
-				$message = '<p>' . __( 'The Solid Central server was unable to process the request at this time. Please try again in a few minutes.', 'it-l10n-ithemes-sync' ) . '</p>';
+				$message = '<p>' . __( 'The Kadence Central server was unable to process the request at this time. Please try again in a few minutes.', 'it-l10n-ithemes-sync' ) . '</p>';
 			}
 
 			foreach ( $result->get_error_messages() as $error ) {
@@ -101,7 +101,7 @@ class Ithemes_Sync_Settings_Page {
 			}
 
 			/* translators: a link URL */
-			$message .= '<p>' . sprintf( __( 'If you continue to experience problems, please contact <a target="_blank" href="%s">SolidWP support</a>.', 'it-l10n-ithemes-sync' ), 'https://go.solidwp.com/central-ssc-error-support' ) . '</p>';
+			$message .= '<p>' . sprintf( __( 'If you continue to experience problems, please contact <a target="_blank" href="%s">Kadence support</a>.', 'it-l10n-ithemes-sync' ), 'https://go.solidwp.com/central-ssc-error-support' ) . '</p>';
 
 			$this->add_error_message( $heading, $message );
 
@@ -234,7 +234,7 @@ class Ithemes_Sync_Settings_Page {
 			<?php if ( empty( $this->options['authentications'] ) ) : ?>
 				<h2><?php _e( 'Connect This Site', 'it-l10n-ithemes-sync' ); ?></h2>
 			<?php else : ?>
-				<h2><?php _e( 'Solid Central', 'it-l10n-ithemes-sync' ); ?></h2>
+				<h2><?php _e( 'Kadence Central', 'it-l10n-ithemes-sync' ); ?></h2>
 			<?php endif; ?>
 
 			<?php $this->show_messages(); ?>
@@ -249,7 +249,7 @@ class Ithemes_Sync_Settings_Page {
 						<p>
 						<?php
 						if ( $this->is_stellarsite ) {
-							_e( 'View the list of connected users below.<br/> You can manage the connection to your StellarSite in Solid Central.', 'it-l10n-ithemes-sync' );
+							_e( 'View the list of connected users below.<br/> You can manage the connection to your StellarSite in Kadence Central.', 'it-l10n-ithemes-sync' );
 						} else {
 							_e( 'Central allows you to connect your site with multiple users.<br/>View the list of connected users below, disconnect users if needed, or add additional users below.', 'it-l10n-ithemes-sync' );
 						}
@@ -329,9 +329,9 @@ class Ithemes_Sync_Settings_Page {
 
 					<div class="ithemes-sync-section-inner">
 						<?php if ( empty( $this->options['authentications'] ) ) : ?>
-							<p><?php _e( 'Begin the connection process to Solid Central.', 'it-l10n-ithemes-sync' ); ?></p>
+							<p><?php _e( 'Begin the connection process to Kadence Central.', 'it-l10n-ithemes-sync' ); ?></p>
 						<?php else : ?>
-							<p><?php _e( 'Add additional users if more than one person will be managing updates for this site, connect again and log in with a different SolidWP user.', 'it-l10n-ithemes-sync' ); ?></p>
+							<p><?php _e( 'Add additional users if more than one person will be managing updates for this site, connect again and log in with a different Kadence user.', 'it-l10n-ithemes-sync' ); ?></p>
 						<?php endif; ?>
 
 						<form id="ithemes-sync-authenticate" enctype="multipart/form-data" method="post" action="<?php echo $this->self_url; ?>">

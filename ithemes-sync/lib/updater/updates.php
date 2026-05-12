@@ -50,6 +50,23 @@ class Ithemes_Updater_Updates {
 			return;
 		}
 
+		// If every key belongs to a Harbor-managed product, skip the legacy API call.
+		require_once( $GLOBALS['ithemes_updater_path'] . '/harbor.php' );
+
+		if ( Ithemes_Updater_Harbor::is_available() && ! empty( $keys ) && empty( $legacy_keys ) ) {
+			$has_legacy = false;
+
+			foreach ( $keys as $slug => $key ) {
+				if ( ! Ithemes_Updater_Harbor::is_product_managed( $slug ) ) {
+					$has_legacy = true;
+					break;
+				}
+			}
+
+			if ( ! $has_legacy ) {
+				return;
+			}
+		}
 
 		Ithemes_Updater_API::get_package_details( false );
 	}

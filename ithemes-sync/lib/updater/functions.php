@@ -35,9 +35,10 @@ class Ithemes_Updater_Functions {
 
 	public static function get_package_name( $package ) {
 		$solid_names = array(
-			'ithemes-security-pro' => 'Solid Security Pro',
+			'ithemes-security-pro' => 'Kadence Security Pro (formerly Solid Security Pro)',
 			'backupbuddy'          => 'Solid Backups',
-			'ithemes-sync'         => 'Solid Central',
+			'ithemes-sync'         => 'Kadence Central (formerly Solid Central)',
+			'solid-backups'        => 'Kadence Backups (formerly Solid Backups)',
 		);
 
 		if ( isset( $solid_names[ $package ] ) ) {

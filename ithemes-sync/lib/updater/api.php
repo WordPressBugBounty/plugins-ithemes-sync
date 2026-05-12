@@ -126,6 +126,12 @@ class Ithemes_Updater_API {
 		$version  = false;
 		$depth    = 0;
 
+		// Calculate a threshold version as the current major version.
+		$threshold_version = preg_match( '/^(\d+)\./', (string) $cur_version, $matches )
+			? max( 0, (int) $matches[1] ) . '.0.0'
+			: null;
+		$current_major_version = isset( $matches[1] ) ? (int) $matches[1] : 0;
+
 		$lines = preg_split( '/[\n\r]+/', $body );
 
 		foreach ( $lines as $line ) {
@@ -141,7 +147,7 @@ class Ithemes_Updater_API {
 				$parts   = preg_split( '/\s+-\s+/', $line );
 				$version = $parts[0];
 
-				if ( version_compare( $version, $cur_version, '<=' ) ) {
+				if ( $threshold_version && version_compare( $version, $threshold_version, '<' ) ) {
 					$version = '';
 					continue;
 				}
@@ -195,6 +201,13 @@ class Ithemes_Updater_API {
 		}
 
 		$changelog = preg_replace( '/\s+$/', '', $changelog );
+
+		if ( $current_major_version > 1 ) {
+			$changelog .= sprintf(
+				'<p>See <a href="https://my.solidwp.com/packages/%s/changelog.txt" target="_blank">full changelog</a>.</p>',
+				$package
+			);
+		}
 
 		return $changelog;
 	}
@@ -382,6 +395,15 @@ class Ithemes_Updater_API {
 			}
 
 			$desired_packages = $new_desired_packages;
+		}
+
+		// Exclude Harbor-managed products — api.ithemes.com does not understand unified keys.
+		require_once $GLOBALS['ithemes_updater_path'] . '/harbor.php';
+
+		foreach ( $desired_packages as $path => $data ) {
+			if ( Ithemes_Updater_Harbor::is_product_managed( $data['package'] ) ) {
+				unset( $desired_packages[ $path ] );
+			}
 		}
 
 		$packages = array();

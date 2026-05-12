@@ -13,7 +13,7 @@ Version History
 
 class Ithemes_Sync_Verb_Update_Show_Sync extends Ithemes_Sync_Verb {
 	public static $name        = 'update-show-sync';
-	public static $description = 'Controls whether the Central plugin and the Solid Central page shows up in the WordPress Dashboard.';
+	public static $description = 'Controls whether the Central plugin and the Kadence Central page shows up in the WordPress Dashboard.';
 	
 	private $default_arguments = [];
 	
