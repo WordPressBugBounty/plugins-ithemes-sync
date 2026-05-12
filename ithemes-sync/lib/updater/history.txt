@@ -108,3 +108,5 @@
 	Enhancement: Add Liquid Web licensing support.
 2.0.1 - 2026-04-20 - Volodymyr Shelmuk
 	Fix: Clarify legacy license notice text.
+2.0.2 - 2026-05-12 - Volodymyr Shelmuk
+	Fix: Fatal error when using the `ithemes_updater_get_licensed_username` function for LW-only managed plugins.

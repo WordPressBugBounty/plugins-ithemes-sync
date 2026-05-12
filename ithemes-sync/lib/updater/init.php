@@ -156,6 +156,10 @@ function ithemes_updater_get_licensed_username( $package ) {
 
 	$details = Ithemes_Updater_API::get_package_details();
 
+	if ( is_wp_error( $details ) ) {
+		return '';
+	}
+
 	if ( ! isset( $details['packages'][ $package ]['user'] ) ) {
 		return '';
 	}

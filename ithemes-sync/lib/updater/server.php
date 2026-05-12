@@ -89,6 +89,10 @@ class Ithemes_Updater_Server {
 	public static function get_package_details( $packages ) {
 		global $rcp_options;
 
+		if ( ! is_array( $packages ) || count( $packages ) < 1 ) {
+			return new WP_Error( 'ithemes-updater-empty-package-list', __( 'Empty package list.', 'it-l10n-ithemes-sync' ) );
+		}
+
 		$query = array();
 
 		$data = array(
