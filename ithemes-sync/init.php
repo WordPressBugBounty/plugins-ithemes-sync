@@ -4,7 +4,7 @@
  * Plugin URI: https://kadencewp.com
  * Description: Maximize and amplify your admin with remote, multi-site management. One centralized dashboard to save time.
  * Author: Kadence
- * Version: 4.0.1
+ * Version: 4.0.2
  * Requires at least: 6.4
  * Requires PHP: 7.0
  * Author URI: https://kadencewp.com

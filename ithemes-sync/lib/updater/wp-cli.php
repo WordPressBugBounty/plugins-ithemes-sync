@@ -59,9 +59,15 @@ final class Ithemes_Updater_WP_CLI_Ithemes_Licensing extends WP_CLI_Command {
 		$package_details = Ithemes_Updater_API::get_package_details( false );
 
 		if ( is_wp_error( $package_details ) ) {
-			WP_CLI::error( sprintf( 'Unable to retrieve product details: %1$s (%2$s)', $package_details->get_error_message(), $package_details->get_error_code() ) );
+			// An empty package list is expected when every installed product is managed by Harbor;
+			// fall through so the Harbor injection block below can populate unified-license entries.
+			if ( 'ithemes-updater-empty-package-list' === $package_details->get_error_code() ) {
+				$package_details = array( 'packages' => array() );
+			} else {
+				WP_CLI::error( sprintf( 'Unable to retrieve product details: %1$s (%2$s)', $package_details->get_error_message(), $package_details->get_error_code() ) );
 
-			return;
+				return;
+			}
 		}
 
 		ksort( $package_details['packages'] );

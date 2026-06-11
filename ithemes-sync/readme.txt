@@ -3,8 +3,8 @@ Contributors: ithemes, solidwp, nexcess, timothyblynjacobs, bitmachina, oakesjos
 Tags: manage multiple websites, backup, security, manage updates, report dashboard
 Requires at least: 6.4
 Requires PHP: 7.0
-Tested up to: 6.9
-Stable tag: 4.0.1
+Tested up to: 7.0
+Stable tag: 4.0.2
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/quick-guide-gplv3.html
 
@@ -128,6 +128,9 @@ Kadence Central includes an automatic “Add Site” prompt when you first login
 Got more questions? [Contact us!](https://solidwp.com/contact.)
 
 == Changelog ==
+
+= 4.0.2 =
+* Tweak: Update `updater` library to v2.0.3.
 
 = 4.0.1 =
 * Tweak: Update `updater` library to v2.0.2.

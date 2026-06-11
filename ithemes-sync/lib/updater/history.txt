@@ -110,3 +110,5 @@
 	Fix: Clarify legacy license notice text.
 2.0.2 - 2026-05-12 - Volodymyr Shelmuk
 	Fix: Fatal error when using the `ithemes_updater_get_licensed_username` function for LW-only managed plugins.
+2.0.3 - 2026-05-21 - Volodymyr Shelmuk
+	Fix: `wp ithemes-licensing show` now reports Harbor-managed products when no legacy-licensed products are installed.

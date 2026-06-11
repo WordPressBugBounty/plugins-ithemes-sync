@@ -297,3 +297,5 @@
 	Tweak: Updated branding from SolidWP to Kadence.
 4.0.1 - 2026-05-12 - Nexcess
 	Tweak: Update `updater` library to v2.0.2.
+4.0.2 - 2026-06-10 - Nexcess
+	Tweak: Update `updater` library to v2.0.3.
