@@ -8,7 +8,6 @@
 namespace SolidWP\Central\Central_Server;
 
 use WP_Error;
-use WP_REST_Request;
 
 /**
  * @phpstan-type Context array{site_id: int, username: string, private_key: string}
@@ -16,30 +15,6 @@ use WP_REST_Request;
 class Central_Server_Client {
 
 	const PLUGIN_API_BASE_URL = 'https://central.solidwp.com/api/plugin';
-
-
-	/**
-	 * @return string|WP_Error The redirect URL to finish site connection.
-	 */
-	public static function authenticate() {
-		$request = new WP_REST_Request( 'POST', '/solid-central/v1/auth/start' );
-		$request->set_query_params(
-			[
-				'type' => 'central-onboard',
-			]
-		);
-		$response = rest_do_request( $request );
-
-		if ( $response->is_error() ) {
-			return $response->as_error();
-		}
-
-		if ( empty( $response->get_data()->redirect ) ) {
-			return new WP_Error( 'solid-central.auth.start.invalid_response', __( 'Invalid response from Kadence Central.', 'it-l10n-ithemes-sync' ) );
-		}
-
-		return $response->get_data()->redirect;
-	}
 
 	/**
 	 * Disconnect the site (current user actually) from the Central server.

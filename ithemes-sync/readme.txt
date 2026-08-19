@@ -4,7 +4,7 @@ Tags: manage multiple websites, backup, security, manage updates, report dashboa
 Requires at least: 6.4
 Requires PHP: 7.0
 Tested up to: 7.0
-Stable tag: 4.0.2
+Stable tag: 4.0.3
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/quick-guide-gplv3.html
 
@@ -128,6 +128,9 @@ Kadence Central includes an automatic “Add Site” prompt when you first login
 Got more questions? [Contact us!](https://solidwp.com/contact.)
 
 == Changelog ==
+
+= 4.0.3 =
+* Tweak: Site connections are now started from the Kadence Central dashboard.
 
 = 4.0.2 =
 * Tweak: Update `updater` library to v2.0.3.

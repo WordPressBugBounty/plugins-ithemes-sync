@@ -40,6 +40,8 @@ class Ithemes_Sync_Settings_Page {
 		list( $this->self_url ) = explode( '?', $_SERVER['REQUEST_URI'] );
 		$this->self_url        .= '?page=' . $this->page_name;
 
+		$this->sync_dashboard_url = apply_filters( 'sync_api_request_url', $this->sync_dashboard_url );
+
 		add_action( 'ithemes_sync_settings_page_load', [ $this, 'handle_post_action' ] );
 		add_action( 'ithemes_sync_settings_page_index', [ $this, 'index' ] );
 		add_action( 'admin_print_styles', [ $this, 'add_styles' ] );
@@ -71,47 +73,11 @@ class Ithemes_Sync_Settings_Page {
 		$post_data = Ithemes_Sync_Functions::get_post_data( [ 'username', 'action', 'user' ], true, true );
 		$action    = $post_data['action'];
 
-		if ( 'authenticate' == $action ) {
-			$this->authenticate();
-		} elseif ( 'deauthenticate' == $action ) {
+		if ( 'deauthenticate' == $action ) {
 			$this->deauthenticate( $post_data );
 		}
 
 		$this->options = $GLOBALS['ithemes-sync-settings']->get_options();
-	}
-
-	private function authenticate() {
-		check_admin_referer( 'authenticate-user' );
-
-		$result = Central_Server_Client::authenticate();
-
-		if ( is_wp_error( $result ) ) {
-			$heading = __( 'The user could not be connected.', 'it-l10n-ithemes-sync' );
-			$code    = $result->get_error_code();
-			$message = '';
-
-			if ( 'http_request_failed' == $code ) {
-				$message = '<p>' . __( 'The Kadence Central server was unable to be contacted. WordPress returned the following error when trying to contact the server:', 'it-l10n-ithemes-sync' ) . '</p>';
-			} elseif ( 'ithemes-sync-server-failed-request' == $code ) {
-				$message = '<p>' . __( 'The Kadence Central server was unable to process the request at this time. Please try again in a few minutes.', 'it-l10n-ithemes-sync' ) . '</p>';
-			}
-
-			foreach ( $result->get_error_messages() as $error ) {
-				$message .= '<p>' . esc_html( $error ) . '</p>';
-			}
-
-			/* translators: a link URL */
-			$message .= '<p>' . sprintf( __( 'If you continue to experience problems, please contact <a target="_blank" href="%s">Kadence support</a>.', 'it-l10n-ithemes-sync' ), 'https://go.solidwp.com/central-ssc-error-support' ) . '</p>';
-
-			$this->add_error_message( $heading, $message );
-
-			return;
-		}
-
-		// We are intentionally redirecting the user outside their WordPress site.
-		// phpcs:ignore WordPress.Security.SafeRedirect
-		wp_redirect( $result );
-		die();
 	}
 
 	private function deauthenticate( $data ) {
@@ -251,7 +217,7 @@ class Ithemes_Sync_Settings_Page {
 						if ( $this->is_stellarsite ) {
 							_e( 'View the list of connected users below.<br/> You can manage the connection to your StellarSite in Kadence Central.', 'it-l10n-ithemes-sync' );
 						} else {
-							_e( 'Central allows you to connect your site with multiple users.<br/>View the list of connected users below, disconnect users if needed, or add additional users below.', 'it-l10n-ithemes-sync' );
+							_e( 'Central allows you to connect your site with multiple users.<br/>View the list of connected users below, and disconnect users if needed.', 'it-l10n-ithemes-sync' );
 						}
 						?>
 						</p>
@@ -289,11 +255,7 @@ class Ithemes_Sync_Settings_Page {
 
 								<p>
 									<?php
-									if ( $this->is_stellarsite ) {
-										_e( 'The following users were not recognized by the server. Reconnection should be preformed from the Central dashboard .', 'it-l10n-ithemes-sync' );
-									} else {
-										_e( 'The following users were not recognized by the server. Disconnect them and reconnect them again to fix this error.', 'it-l10n-ithemes-sync' );
-									}
+									_e( 'The following users were not recognized by the server. Reconnection should be performed from the Kadence Central dashboard.', 'it-l10n-ithemes-sync' );
 									?>
 								</p>
 
@@ -321,25 +283,12 @@ class Ithemes_Sync_Settings_Page {
 						<?php endif; ?>
 					</div>
 				</div>
-			<?php endif; ?>
-
-			<?php if ( ! $this->is_stellarsite ) : ?>
+			<?php else : ?>
 				<div class="ithemes-sync-section ithemes-sync-authorize">
-					<h3><?php _e( 'Add Users', 'it-l10n-ithemes-sync' ); ?></h3>
-
 					<div class="ithemes-sync-section-inner">
-						<?php if ( empty( $this->options['authentications'] ) ) : ?>
-							<p><?php _e( 'Begin the connection process to Kadence Central.', 'it-l10n-ithemes-sync' ); ?></p>
-						<?php else : ?>
-							<p><?php _e( 'Add additional users if more than one person will be managing updates for this site, connect again and log in with a different Kadence user.', 'it-l10n-ithemes-sync' ); ?></p>
-						<?php endif; ?>
+						<p><?php _e( 'To connect this site, add it from your Kadence Central dashboard.', 'it-l10n-ithemes-sync' ); ?></p>
 
-						<form id="ithemes-sync-authenticate" enctype="multipart/form-data" method="post" action="<?php echo $this->self_url; ?>">
-							<input type="submit" id="submit" value="<?php _e( 'Connect', 'it-l10n-ithemes-sync' ); ?>">
-							<input type="hidden" name="action" value="authenticate">
-
-							<?php wp_nonce_field( 'authenticate-user' ); ?>
-						</form>
+						<a class="ithemes-sync-button" href="<?php echo esc_url( $this->sync_dashboard_url ); ?>" target="_blank"><?php _e( 'Go to Kadence Central', 'it-l10n-ithemes-sync' ); ?></a>
 					</div>
 				</div>
 			<?php endif; ?>

@@ -299,3 +299,5 @@
 	Tweak: Update `updater` library to v2.0.2.
 4.0.2 - 2026-06-10 - Nexcess
 	Tweak: Update `updater` library to v2.0.3.
+4.0.3 - 2026-08-19 - Nexcess
+	Tweak: Site connections are now started from the Kadence Central dashboard.
