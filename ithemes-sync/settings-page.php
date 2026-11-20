@@ -74,6 +74,8 @@ class Ithemes_Sync_Settings_Page {
 		$action    = $post_data['action'];
 
 		if ( 'deauthenticate' == $action ) {
+			check_admin_referer( $this->get_deauthenticate_nonce_action( $post_data['user'] ) );
+
 			$this->deauthenticate( $post_data );
 		}
 
@@ -230,15 +232,9 @@ class Ithemes_Sync_Settings_Page {
 								<?php foreach ( $valid_users as $user_id ) : ?>
 								<li>
 									<div class="user"><?php echo esc_attr( $this->options['authentications'][ $user_id ]['username'] ); ?></div>
-									<?php
-									$query_args = [
-										'action' => 'deauthenticate',
-										'user'   => $user_id,
-									];
-									?>
 									<?php if ( ! $this->is_stellarsite ) : ?>
 									<div class="deauthenticate">
-										<a href="<?php echo add_query_arg( $query_args, $this->self_url ); ?>">
+										<a href="<?php echo esc_url( $this->get_deauthenticate_url( $user_id ) ); ?>">
 											<?php _e( 'Disconnect', 'it-l10n-ithemes-sync' ); ?>
 										</a>
 									</div>
@@ -263,15 +259,9 @@ class Ithemes_Sync_Settings_Page {
 									<?php foreach ( $invalid_users as $user_id ) : ?>
 									<li>
 										<div class="user"><?php echo esc_attr( $this->options['authentications'][ $user_id ]['username'] ); ?></div>
-										<?php
-										$query_args = [
-											'action' => 'deauthenticate',
-											'user'   => $user_id,
-										];
-										?>
 										<?php if ( ! $this->is_stellarsite ) :?>
 											<div class="deauthenticate">
-												<a href="<?php echo add_query_arg( $query_args, $this->self_url ); ?>">
+												<a href="<?php echo esc_url( $this->get_deauthenticate_url( $user_id ) ); ?>">
 													<?php _e( 'Disconnect', 'it-l10n-ithemes-sync' ); ?>
 												</a>
 											</div>
@@ -300,6 +290,40 @@ class Ithemes_Sync_Settings_Page {
 
 	private function sort_usernames( $a, $b ) {
 		return strcasecmp( $this->options['authentications'][ $a ]['username'], $this->options['authentications'][ $b ]['username'] );
+	}
+
+	/**
+	 * Get the nonce action for disconnecting a connection.
+	 *
+	 * @since 4.0.3.1
+	 *
+	 * @param int|string $user_id The connection ID.
+	 *
+	 * @return string
+	 */
+	private function get_deauthenticate_nonce_action( $user_id ): string {
+		return 'ithemes_sync_deauthenticate_' . $user_id;
+	}
+
+	/**
+	 * Get the nonce-protected URL for disconnecting a connection.
+	 *
+	 * @since 4.0.3.1
+	 *
+	 * @param int|string $user_id The connection ID.
+	 *
+	 * @return string
+	 */
+	private function get_deauthenticate_url( $user_id ): string {
+		$url = add_query_arg(
+			[
+				'action' => 'deauthenticate',
+				'user'   => $user_id,
+			],
+			$this->self_url
+		);
+
+		return wp_nonce_url( $url, $this->get_deauthenticate_nonce_action( $user_id ) );
 	}
 }
 
